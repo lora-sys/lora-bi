@@ -2,7 +2,7 @@
 # @author lora
 spring:
   application:
-    name: springboot-init
+    name: bi
   # 默认 dev 环境
   profiles:
     active: dev
@@ -99,4 +99,4 @@ knife4j:
       default:
         api-rule: package
         api-rule-resources:
-          - com.yupi.springbootinit.controller
+          - com.lora.bi.controller

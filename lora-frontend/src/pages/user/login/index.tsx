@@ -15,12 +15,13 @@ import {
 import { Helmet, useModel } from '@umijs/max';
 import { Alert, App, Tabs } from 'antd';
 import { createStyles } from 'antd-style';
-import React, { useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import { flushSync } from 'react-dom';
 import { Footer } from '@/components';
 import { login } from '@/services/ant-design-pro/api';
 import { getFakeCaptcha } from '@/services/ant-design-pro/login';
 import Settings from '../../../../config/defaultSettings';
+import {listChartByPageUsingPost} from "@/services/lora-bi/chartController";
 const useStyles = createStyles(({ token }) => {
   return {
     action: {
@@ -101,6 +102,12 @@ const Login: React.FC = () => {
       });
     }
   };
+
+  useEffect(() => {
+    listChartByPageUsingPost({}).then((res)=>{
+      console.error("res",res);
+    })
+  }, []);
   const handleSubmit = async (values: API.LoginParams) => {
     try {
       // 登录

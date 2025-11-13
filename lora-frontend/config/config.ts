@@ -19,6 +19,7 @@ export default defineConfig({
    * @description 让 build 之后的产物包含 hash 后缀。通常用于增量发布和避免浏览器加载缓存。
    * @doc https://umijs.org/docs/api/config#hash
    */
+
   hash: true,
   publicPath: PUBLIC_PATH,
   /**
@@ -62,6 +63,7 @@ export default defineConfig({
    * @description 一个不错的热更新组件，更新时可以保留 state
    */
   fastRefresh: true,
+
   //============== 以下都是max的插件配置 ===============
   /**
    * @name 数据流插件
@@ -146,14 +148,16 @@ export default defineConfig({
       requestLibPath: "import { request } from '@umijs/max'",
       // 或者使用在线的版本
       // schemaPath: "https://gw.alipayobjects.com/os/antfincdn/M%24jrzTTYJN/oneapi.json"
-      schemaPath: join(__dirname, 'oneapi.json'),
+      //schemaPath: join(__dirname, 'oneapi.json'),
+      schemaPath : "http://localhost:8101/api/v2/api-docs",
+      projectName: 'lora-bi',
       mock: false,
-    },
-    {
-      requestLibPath: "import { request } from '@umijs/max'",
-      schemaPath: 'https://gw.alipayobjects.com/os/antfincdn/CA1dOm%2631B/openapi.json',
-      projectName: 'swagger',
-    },
+    }
+    // {
+    //   requestLibPath: "import { request } from '@umijs/max'",
+    //   schemaPath: 'https://gw.alipayobjects.com/os/antfincdn/CA1dOm%2631B/openapi.json',
+    //   projectName: 'swagger',
+    // },
   ],
   mock: {
     include: ['mock/**/*', 'src/pages/**/_mock.ts'],

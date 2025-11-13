@@ -25,19 +25,30 @@ export default {
    * @name 详细的代理配置
    * @doc https://github.com/chimurai/http-proxy-middleware
    */
+  // dev:{
+  //   // localhost:8000/api/** -> http://localhost:8101/api/**
+  //   '/api/':{
+  //     // 代理地址
+  //     target: "http://localhost:8101",
+  //     // 配置了这个可以从 http 代理到 https
+  //     // 依赖 origin 的功能可能需要这个，比如 cookie
+  //     changeOrigin: true,
+  //     // pathRewrite: { '^': '' },
+  //   }
+  // },
   test: {
     // localhost:8000/api/** -> https://preview.pro.ant.design/api/**
     '/api/': {
       target: 'https://proapi.azurewebsites.net',
       changeOrigin: true,
-      pathRewrite: { '^': '' },
+      pathRewrite: {'^': ''},
     },
   },
   pre: {
     '/api/': {
       target: 'your pre url',
       changeOrigin: true,
-      pathRewrite: { '^': '' },
+      pathRewrite: {'^': ''},
     },
   },
 };
