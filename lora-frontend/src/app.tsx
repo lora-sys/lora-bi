@@ -14,7 +14,7 @@ const isDevOrTest = isDev || process.env.CI;
 const loginPath = '/user/login';
 
 /**
- * @see https://umijs.org/docs/api/runtime-config#getinitialstate
+ *
  * */
 export async function getInitialState(): Promise<{
   settings?: Partial<LayoutSettings>;
