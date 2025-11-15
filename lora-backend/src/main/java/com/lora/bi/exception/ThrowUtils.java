@@ -5,8 +5,8 @@ import com.lora.bi.common.ErrorCode;
 /**
  * 抛异常工具类
  *
- * @author <a href="https://github.com/liyupi">程序员lora</a>
- * @from <a href="https://yupi.icu">编程导航知识星球</a>
+ * @author lora
+ *
  */
 public class ThrowUtils {
 
@@ -27,9 +27,11 @@ public class ThrowUtils {
      *
      * @param condition
      * @param errorCode
+     * @return
      */
-    public static void throwIf(boolean condition, ErrorCode errorCode) {
+    public static String throwIf(boolean condition, ErrorCode errorCode) {
         throwIf(condition, new BusinessException(errorCode));
+        return null;
     }
 
     /**

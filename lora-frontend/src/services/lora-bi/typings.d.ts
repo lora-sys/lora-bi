@@ -1,4 +1,10 @@
 declare namespace API {
+  type BaseResponseBiGenVO_ = {
+    code?: number;
+    data?: BiGenVO;
+    message?: string;
+  };
+
   type BaseResponseBoolean_ = {
     code?: number;
     data?: boolean;
@@ -77,6 +83,13 @@ declare namespace API {
     message?: string;
   };
 
+  type BiGenVO = {
+    chartOption?: string;
+    conclusion?: string;
+    genChartByAIRequest?: Record<string, any>;
+    success?: boolean;
+  };
+
   type Chart = {
     chartData?: string;
     chartType?: string;
@@ -86,6 +99,7 @@ declare namespace API {
     goal?: string;
     id?: number;
     isDelete?: number;
+    name?: string;
     updateTime?: string;
     userId?: number;
   };
@@ -94,6 +108,7 @@ declare namespace API {
     chartData?: string;
     chartType?: string;
     goal?: string;
+    name?: string;
   };
 
   type ChartEditRequest = {
@@ -101,6 +116,7 @@ declare namespace API {
     chartType?: string;
     goal?: string;
     id?: number;
+    name?: string;
   };
 
   type ChartQueryRequest = {
@@ -108,6 +124,7 @@ declare namespace API {
     current?: number;
     goal?: string;
     id?: number;
+    name?: string;
     pageSize?: number;
     sortField?: string;
     sortOrder?: string;
@@ -121,12 +138,19 @@ declare namespace API {
     goal?: string;
     id?: number;
     isDelete?: number;
+    name?: string;
     updateTime?: string;
     userId?: number;
   };
 
   type DeleteRequest = {
     id?: number;
+  };
+
+  type genChartByAIUsingPOSTParams = {
+    chartType?: string;
+    goal?: string;
+    name?: string;
   };
 
   type getChartByIdUsingGETParams = {

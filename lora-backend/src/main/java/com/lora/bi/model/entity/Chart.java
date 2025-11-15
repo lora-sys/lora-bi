@@ -14,6 +14,13 @@ import java.util.Date;
 @TableName(value ="chart")
 @Data
 public class Chart {
+
+    /**
+     * 图表名称
+     */
+     private String name;
+
+
     /**
      * id
      */
@@ -66,4 +73,5 @@ public class Chart {
     private Integer isDelete;
 
     private static final long serialVersionUID = 1L;
+
 }

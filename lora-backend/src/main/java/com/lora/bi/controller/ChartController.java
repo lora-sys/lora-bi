@@ -15,8 +15,10 @@ import com.lora.bi.exception.ThrowUtils;
 import com.lora.bi.model.dto.chart.*;
 import com.lora.bi.model.entity.Chart;
 import com.lora.bi.model.entity.User;
+import com.lora.bi.model.vo.BiGenVO;
 import com.lora.bi.service.ChartService;
 import com.lora.bi.service.UserService;
+import com.lora.bi.utils.AiResponseParser;
 import com.lora.bi.utils.ExcelUtils;
 import com.lora.bi.utils.SqlUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -28,7 +30,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 
 /**
@@ -46,6 +47,9 @@ public class ChartController {
 
     @Resource
     private UserService userService;
+
+    @Resource
+    private com.lora.bi.service.AiService aiService;
 
     private final static Gson GSON = new Gson();
 
@@ -250,48 +254,135 @@ public class ChartController {
      * @return
      */
     @PostMapping("/gen")
-    public BaseResponse<String> genChartByAI(@RequestPart("file") MultipartFile multipartFile,
-
-                                           GenChartByAIRequest genChartByAIRequest, HttpServletRequest request) throws IOException {
+    public BaseResponse<BiGenVO> genChartByAI(@RequestPart("file") MultipartFile multipartFile,
+                                              GenChartByAIRequest genChartByAIRequest, HttpServletRequest request) throws IOException {
         String chartType = genChartByAIRequest.getChartType();
         String name = genChartByAIRequest.getName();
         String goal = genChartByAIRequest.getGoal();
         // 校验
+
+        User loginUser = userService.getLoginUser(request);
+
+
         // 校验参数
         ThrowUtils.throwIf(StringUtils.isBlank(name) || name.length() > 100, ErrorCode.PARAMS_ERROR, "名称过长");
         ThrowUtils.throwIf(StringUtils.isBlank(goal), ErrorCode.PARAMS_ERROR, "分析目标不能为空");
-        
-        // 用户输入
-        StringBuilder userInput =  new StringBuilder();
-        userInput.append("分析目标"+goal).append("\n");
-        //压缩后的数据
-        String result = ExcelUtils.excelToCsv(multipartFile);
-        userInput.append("数据"+result).append("\n");
+        ThrowUtils.throwIf(multipartFile.isEmpty(), ErrorCode.PARAMS_ERROR, "上传的文件不能为空");
 
-        return ResultUtils.success(userInput.toString());
-//        // 读取用户上传来的文件 excel 文件，进行一个处理
-//        String uuid = RandomStringUtils.randomAlphanumeric(8);
-//        String filename = uuid + "-" + multipartFile.getOriginalFilename();
-//        File file = null;
-//
-//
-//        try {
-//            return null;
-//        } catch (Exception e) {
-//            log.warn("");
-//        } finally {
-//            if (file != null) {
-//                // 删除临时文件
-//                boolean delete = file.delete();
-//                if (!delete) {
-//                    return null;
-//
-//                }
-//            }
-//        }
-//
-//        return null;
-//    }
+        try {
+            //压缩后的数据
+            String csvData = ExcelUtils.excelToCsv(multipartFile);
+            // 数据采样优化：如果数据行数过多，只取前100行
+            log.info("处理后的CSV数据: {}", csvData);
+            // 构造用户输入
+            String userInput = String.format("分析目标：%s\n图表类型：%s\n名称：%s\n原始数据：\n%s",
+                    goal, chartType, name, csvData);
+
+            // 记录发送给AI的完整提示词
+            log.info("发送给AI的完整提示词: {}", userInput);
+            ThrowUtils.throwIf(userInput.isEmpty(), ErrorCode.PARAMS_ERROR, "用户输入不能为空" + userInput);
+            // 调用AI服务，使用配置好的chartChatBot进行数据分析
+
+            String aiResult = aiService.sendMessage(userInput);
+
+            // 记录AI原始响应的前500个字符，便于调试
+            if (aiResult != null && aiResult.length() > 0) {
+                String preview = aiResult.length() > 500 ? aiResult.substring(0, 500) + "..." : aiResult;
+                log.info("AI原始响应预览: {}", preview);
+            }
+
+            log.info("AI原始响应长度: {}", aiResult != null ? aiResult.length() : 0);
+
+            log.debug("AI原始响应内容: {}", aiResult);
+
+
+            // 检查AI是否返回了有效内容
+
+            if (aiResult == null || aiResult.trim().isEmpty()) {
+
+                log.error("AI返回了空内容，可能API调用失败或超时");
+
+                throw new BusinessException(ErrorCode.OPERATION_ERROR, "AI服务未返回有效内容，请稍后重试");
+
+            }
+
+
+            // 解析AI响应，提取图表配置和分析结论
+
+            String chartOption = AiResponseParser.extractContentByTag(aiResult, "execute");
+
+            String conclusion = AiResponseParser.extractContentByTag(aiResult, "text");
+
+            log.info("提取的图表配置: {}", chartOption);
+
+            log.info("提取的分析结论: {}", conclusion);
+
+            log.info("提取的图表配置长度: {}", chartOption != null ? chartOption.length() : 0);
+
+            log.info("提取的分析结论长度: {}", conclusion != null ? conclusion.length() : 0);
+
+
+            // 检查解析结果是否有效
+
+            if (chartOption == null || chartOption.trim().isEmpty()) {
+
+                log.error("未能从AI响应中提取到有效的图表配置");
+
+                throw new BusinessException(ErrorCode.OPERATION_ERROR, "AI未能生成有效的图表配置，请检查输入数据或稍后重试");
+
+            }
+
+
+            if (conclusion == null || conclusion.trim().isEmpty()) {
+
+                log.warn("未能从AI响应中提取到分析结论");
+
+                // 这里我们不抛出异常，因为图表配置是主要的，分析结论是次要的
+
+            }
+
+
+            // 插入数据库
+
+            Chart chart = new Chart();
+
+            chart.setChartData(csvData);
+
+            chart.setGoal(goal);
+
+            chart.setChartType(chartType);
+
+            chart.setName(name);
+
+            chart.setUserId(loginUser.getId());
+
+            chart.setGenChart(chartOption);
+
+            chart.setGenResult(conclusion);
+
+            boolean save = chartService.save(chart);
+
+            ThrowUtils.throwIf(!save, ErrorCode.OPERATION_ERROR, "数据图表保存失败");
+
+
+            // 构造返回结果
+
+            BiGenVO biGenVO = new BiGenVO();
+
+            biGenVO.setChartOption(chartOption);
+
+            biGenVO.setConclusion(conclusion);
+
+            biGenVO.setSuccess(true);
+
+            biGenVO.setGenChartByAIRequest(genChartByAIRequest); // 返回请求参数，便于调试
+
+
+            return ResultUtils.success(biGenVO);
+        } catch (Exception e) {
+            log.error("AI生成图表失败", e);
+            throw new BusinessException(ErrorCode.OPERATION_ERROR, "AI生成图表失败: " + e.getMessage());
+        }
     }
 }
 

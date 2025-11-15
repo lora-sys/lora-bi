@@ -28,6 +28,7 @@ package-lock.json
 functions/*
 .temp/**
 
+/.env
 # umi
 .umi
 .umi-production

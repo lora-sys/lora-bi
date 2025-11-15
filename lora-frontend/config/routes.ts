@@ -2,22 +2,22 @@ export default [
   {
     path: '/user',
     layout: false,
-    routes: [{ name: '登录', path: '/user/login', component: './user/login' },
-      { name: '注册', path: '/user/register', component: './user/register' }
+    routes: [{name: '登录', path: '/user/login', component: './user/login'},
+      {name: '注册', path: '/user/register', component: './user/register'}
     ],
   },
-  { path: '/welcome', name: '欢迎', icon: 'smile', component: './Welcome' },
+  {path: '/',name: '首页', redirect: '/'},
+  {path: '/add',name: '智能分析', icon: 'HeatMap', component: './AddChart'},
   {
     path: '/admin',
     name: '管理页',
     icon: 'crown',
     access: 'canAdmin',
     routes: [
-      { path: '/admin', redirect: '/admin/sub-page' },
-      { path: '/admin/sub-page', name: '二级管理页', component: './Admin' },
+      {path: '/admin', redirect: '/admin/sub-page'},
+      {path: '/admin/sub-page', name: '二级管理页', component: './Admin'},
     ],
   },
-  { name: '查询表格', icon: 'table', path: '/list', component: './table-list' },
-  { path: '/', redirect: '/welcome' },
-  { component: '404', layout: false, path: './*' },
+  {path: '/', redirect: '/welcome'},
+  {component: '404', layout: false, path: './*'},
 ];

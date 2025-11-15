@@ -35,7 +35,7 @@ import static com.lora.bi.service.impl.UserServiceImpl.SALT;
  * 用户接口
  *
  * @author <a href="https://github.com/lilora">程序员lora</a>
- * @from <a href="https://lora.icu">编程导航知识星球</a>
+ *
  */
 @RestController
 @RequestMapping("/user")
