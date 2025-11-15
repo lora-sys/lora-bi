@@ -100,3 +100,12 @@ knife4j:
         api-rule: package
         api-rule-resources:
           - com.lora.bi.controller
+# z.ai 配置
+zai:
+  client:
+    api-key: 4f045d60167549999025da13c71b352a.cEaLvlxkSbTIAkrS
+    model: glm-4.6
+    temperature: 0.7
+    max-tokens: 2048
+    base-url: https://api.z.ai/api/paas/v4/
+    system-message: "你是一个专业的数据分析师，能够帮助用户分析图表数据"

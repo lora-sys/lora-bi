@@ -26,6 +26,7 @@
 
 ![架构图](./arthitecture.svg)
 
+![https://www.yuque.com/lora-imhbk/ct9fot/fq17hmfgnbim28yk?singleDoc# 《智能bi 笔记》](https://www.yuque.com/lora-imhbk/ct9fot/fq17hmfgnbim28yk?singleDoc# 《智能bi 笔记》)
 
 ## 技术选型
 前端
@@ -43,5 +44,3 @@
 6. excel上传和数据处理解析 easy excel
 7.  swagger+knife4j 接口文档
 8.  HuTool 工具类库
-
-

@@ -1,11 +1,12 @@
 // https://umijs.org/config/
 
-import { join } from 'node:path';
-import { defineConfig } from '@umijs/max';
+import {join} from 'node:path';
+import {defineConfig} from '@umijs/max';
 import defaultSettings from './defaultSettings';
 import proxy from './proxy';
 import routes from './routes';
-const { UMI_ENV = 'dev' } = process.env;
+
+const {UMI_ENV = 'dev'} = process.env;
 
 /**
  * @name 使用公共路径
@@ -80,7 +81,7 @@ export default defineConfig({
    * @name layout 插件
    * @doc https://umijs.org/docs/max/layout-menu
    */
-  title: 'Ant Design Pro',
+  title: 'lora 智能BI',
   layout: {
     locale: true,
     ...defaultSettings,
@@ -149,7 +150,7 @@ export default defineConfig({
       // 或者使用在线的版本
       // schemaPath: "https://gw.alipayobjects.com/os/antfincdn/M%24jrzTTYJN/oneapi.json"
       //schemaPath: join(__dirname, 'oneapi.json'),
-      schemaPath : "http://localhost:8101/api/v2/api-docs",
+      schemaPath: "http://localhost:8101/api/v2/api-docs",
       projectName: 'lora-bi',
       mock: false,
     }

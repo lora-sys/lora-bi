@@ -12,24 +12,24 @@ import com.lora.bi.constant.CommonConstant;
 import com.lora.bi.constant.UserConstant;
 import com.lora.bi.exception.BusinessException;
 import com.lora.bi.exception.ThrowUtils;
-import com.lora.bi.model.dto.chart.ChartAddRequest;
-import com.lora.bi.model.dto.chart.ChartEditRequest;
-import com.lora.bi.model.dto.chart.ChartQueryRequest;
-import com.lora.bi.model.dto.chart.ChartUpdateRequest;
+import com.lora.bi.model.dto.chart.*;
 import com.lora.bi.model.entity.Chart;
 import com.lora.bi.model.entity.User;
 import com.lora.bi.service.ChartService;
 import com.lora.bi.service.UserService;
+import com.lora.bi.utils.ExcelUtils;
 import com.lora.bi.utils.SqlUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
-import java.util.List;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 
 /**
  * 帖子接口
@@ -147,7 +147,7 @@ public class ChartController {
      */
     @PostMapping("/list/page")
     public BaseResponse<Page<Chart>> listChartByPage(@RequestBody ChartQueryRequest chartQueryRequest,
-            HttpServletRequest request) {
+                                                     HttpServletRequest request) {
         long current = chartQueryRequest.getCurrent();
         long size = chartQueryRequest.getPageSize();
         // 限制爬虫
@@ -166,7 +166,7 @@ public class ChartController {
      */
     @PostMapping("/my/list/page")
     public BaseResponse<Page<Chart>> listMyChartByPage(@RequestBody ChartQueryRequest chartQueryRequest,
-            HttpServletRequest request) {
+                                                       HttpServletRequest request) {
         if (chartQueryRequest == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
@@ -223,13 +223,15 @@ public class ChartController {
         }
         // 获取查询条件
         Long id = chartQueryRequest.getId();
+        String name = chartQueryRequest.getName();
         String goal = chartQueryRequest.getGoal();
         String chartType = chartQueryRequest.getChartType();
         Long userId = chartQueryRequest.getUserId();
         String sortField = chartQueryRequest.getSortField();
         String sortOrder = chartQueryRequest.getSortOrder();
-       // 拼接查询条件
+        // 拼接查询条件
         queryWrapper.eq(id != null && id > 0, "id", id);
+        queryWrapper.like(StringUtils.isNotBlank(name), "name", name);
         queryWrapper.eq(StringUtils.isNotBlank(goal), "goal", goal);
         queryWrapper.eq(StringUtils.isNotBlank(chartType), "chartType", chartType);
         queryWrapper.eq(ObjectUtils.isNotEmpty(userId), "userId", userId);
@@ -239,5 +241,58 @@ public class ChartController {
         return queryWrapper;
     }
 
+    /**
+     * 智能分析，根据用户上传数据类型,结合用户的建议图表类型和提示词，智能生成图表
+     *
+     * @param multipartFile
+     * @param genChartByAIRequest
+     * @param request
+     * @return
+     */
+    @PostMapping("/gen")
+    public BaseResponse<String> genChartByAI(@RequestPart("file") MultipartFile multipartFile,
 
+                                           GenChartByAIRequest genChartByAIRequest, HttpServletRequest request) throws IOException {
+        String chartType = genChartByAIRequest.getChartType();
+        String name = genChartByAIRequest.getName();
+        String goal = genChartByAIRequest.getGoal();
+        // 校验
+        // 校验参数
+        ThrowUtils.throwIf(StringUtils.isBlank(name) || name.length() > 100, ErrorCode.PARAMS_ERROR, "名称过长");
+        ThrowUtils.throwIf(StringUtils.isBlank(goal), ErrorCode.PARAMS_ERROR, "分析目标不能为空");
+        
+        // 用户输入
+        StringBuilder userInput =  new StringBuilder();
+        userInput.append("分析目标"+goal).append("\n");
+        //压缩后的数据
+        String result = ExcelUtils.excelToCsv(multipartFile);
+        userInput.append("数据"+result).append("\n");
+
+        return ResultUtils.success(userInput.toString());
+//        // 读取用户上传来的文件 excel 文件，进行一个处理
+//        String uuid = RandomStringUtils.randomAlphanumeric(8);
+//        String filename = uuid + "-" + multipartFile.getOriginalFilename();
+//        File file = null;
+//
+//
+//        try {
+//            return null;
+//        } catch (Exception e) {
+//            log.warn("");
+//        } finally {
+//            if (file != null) {
+//                // 删除临时文件
+//                boolean delete = file.delete();
+//                if (!delete) {
+//                    return null;
+//
+//                }
+//            }
+//        }
+//
+//        return null;
+//    }
+    }
 }
+
+

@@ -1,14 +1,11 @@
 import {LinkOutlined} from '@ant-design/icons';
-import type {Settings as LayoutSettings} from '@ant-design/pro-components';
-import {SettingDrawer} from '@ant-design/pro-components';
 import type {RequestConfig, RunTimeLayoutConfig} from '@umijs/max';
 import {history, Link} from '@umijs/max';
 import React from 'react';
 import {AvatarDropdown, AvatarName, Footer, Question} from '@/components';
-import {currentUser as queryCurrentUser} from '@/services/ant-design-pro/api';
-import defaultSettings from '../config/defaultSettings';
 import {errorConfig} from './requestErrorConfig';
 import '@ant-design/v5-patch-for-react-19';
+import {getLoginUserUsingGet} from "@/services/lora-bi/userController";
 
 const isDev = process.env.NODE_ENV === 'development';
 const isDevOrTest = isDev || process.env.CI;
@@ -18,16 +15,11 @@ const loginPath = '/user/login';
  *
  * */
 export async function getInitialState(): Promise<{
-  settings?: Partial<LayoutSettings>;
-  currentUser?: API.CurrentUser;
-  loading?: boolean;
-  fetchUserInfo?: () => Promise<API.CurrentUser | undefined>;
+  currentUser?: API.LoginUserVO;
 }> {
   const fetchUserInfo = async () => {
     try {
-      const msg = await queryCurrentUser({
-        skipErrorHandler: true,
-      });
+      const msg = await getLoginUserUsingGet();
       return msg.data;
     } catch (_error) {
       history.push(loginPath);
@@ -39,14 +31,10 @@ export async function getInitialState(): Promise<{
   if (![loginPath, '/user/register', '/user/register-result'].includes(location.pathname)) {
     const currentUser = await fetchUserInfo();
     return {
-      fetchUserInfo,
       currentUser,
-      settings: defaultSettings as Partial<LayoutSettings>,
     };
   }
   return {
-    fetchUserInfo,
-    settings: defaultSettings as Partial<LayoutSettings>,
   };
 }
 
@@ -55,12 +43,12 @@ export const layout: RunTimeLayoutConfig = ({initialState, setInitialState}) => 
   return {
     actionsRender: () => [<Question key="doc"/>],
     avatarProps: {
-      src: initialState?.currentUser?.avatar,
+      src: initialState?.currentUser?.userAvatar,
       title: <AvatarName/>,
       render: (_, avatarChildren) => <AvatarDropdown>{avatarChildren}</AvatarDropdown>,
     },
     waterMarkProps: {
-      content: initialState?.currentUser?.name,
+      content: initialState?.currentUser?.userName,
     },
     footerRender: () => <Footer/>,
     onPageChange: () => {
@@ -100,30 +88,7 @@ export const layout: RunTimeLayoutConfig = ({initialState, setInitialState}) => 
       : [],
     menuHeaderRender: undefined,
     // 自定义 403 页面
-    // unAccessible: <div>unAccessible</div>,
-    // 增加一个 loading 的状态
-    childrenRender: (children) => {
-      // if (initialState?.loading) return <PageLoading />;
-      return (
-        <>
-          {children}
-          {isDevOrTest && (
-            <SettingDrawer
-              disableUrlParams
-              enableDarkTheme
-              settings={initialState?.settings}
-              onSettingChange={(settings) => {
-                setInitialState((preInitialState) => ({
-                  ...preInitialState,
-                  settings,
-                }));
-              }}
-            />
-          )}
-        </>
-      );
-    },
-    ...initialState?.settings,
+    unAccessible: <div>unAccessible</div>
   };
 };
 
@@ -134,5 +99,6 @@ export const layout: RunTimeLayoutConfig = ({initialState, setInitialState}) => 
  */
 export const request: RequestConfig = {
   baseURL: 'http://localhost:8101',
+  withCredentials: true,
   ...errorConfig,
 };

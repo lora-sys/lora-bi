@@ -1,12 +1,12 @@
 {
-  "name": "Ant Design Pro",
-  "short_name": "Ant Design Pro",
+  "name": "lora 智能BI Pro",
+  "short_name": "lora 智能BI Pro",
   "display": "standalone",
   "start_url": "./?utm_source=homescreen",
   "theme_color": "#002140",
-  "background_color": "#001529",
-  "icons": [
+  "icons":[
     {
+      "background_color": "#001529",
       "src": "icons/icon-192x192.png",
       "sizes": "192x192"
     },

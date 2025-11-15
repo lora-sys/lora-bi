@@ -24,6 +24,13 @@ public class ChartQueryRequest extends PageRequest implements Serializable {
     @TableId(type = IdType.AUTO)
     private Long id;
 
+
+
+    /**
+     * 图表名称
+     */
+    private String name;
+
     /**
      * 分析目标
      */
@@ -40,4 +47,6 @@ public class ChartQueryRequest extends PageRequest implements Serializable {
     private Long userId;
 
     private static final long serialVersionUID = 1L;
+
+
 }

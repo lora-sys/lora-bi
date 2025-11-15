@@ -14,7 +14,7 @@ import {flushSync} from 'react-dom';
 import {Footer} from '@/components';
 import Settings from '../../../../config/defaultSettings';
 import {listChartByPageUsingPost} from "@/services/lora-bi/chartController";
-import {getLoginUserUsingGet, userLoginUsingPost} from "@/services/lora-bi/userController";
+import {getLoginUserUsingGet, userLoginUsingPost, userRegisterUsingPost} from "@/services/lora-bi/userController";
 
 const useStyles = createStyles(({token}) => {
   return {
@@ -101,10 +101,10 @@ const Login: React.FC = () => {
   }, []);
   const handleSubmit = async (values: API.UserLoginRequest) => {
     try {
-      // 登录
-      const msg = await userLoginUsingPost(values);
+      // 注册
+      const msg = await userRegisterUsingPost(values);
       if (msg.code === 0) {
-        const defaultLoginSuccessMessage = '登录成功！';
+        const defaultLoginSuccessMessage = '注册成功！';
         message.success(defaultLoginSuccessMessage);
         await fetchUserInfo();
         const urlParams = new URL(window.location.href).searchParams;
@@ -115,7 +115,7 @@ const Login: React.FC = () => {
       }
 
     } catch (error) {
-      const defaultLoginFailureMessage = '登录失败，请重试！';
+      const defaultLoginFailureMessage = '注册失败，请重试！';
       console.log(error);
       message.error(defaultLoginFailureMessage);
     }
@@ -125,7 +125,7 @@ const Login: React.FC = () => {
     <div className={styles.container}>
       <Helmet>
         <title>
-          {'登录'}
+          {'注册'}
           {Settings.title && ` - ${Settings.title}`}
         </title>
       </Helmet>
@@ -147,7 +147,7 @@ const Login: React.FC = () => {
             autoLogin: true,
           }}
           onFinish={async (values) => {
-            await handleSubmit(values as API.UserLoginRequest);
+            await handleSubmit(values as API.UserRegisterRequest);
           }}
         >
           <Tabs
@@ -193,6 +193,20 @@ const Login: React.FC = () => {
                   },
                 ]}
               />
+              <ProFormText.Password
+                name="checkPassword"
+                fieldProps={{
+                  size: 'large',
+                  prefix: <LockOutlined/>,
+                }}
+                placeholder={'密码: 请再次输入确认密码'}
+                rules={[
+                  {
+                    required: true,
+                    message: '密码是必填项！',
+                  },
+                ]}
+              />
             </>
           )}
 
@@ -203,10 +217,10 @@ const Login: React.FC = () => {
             }}
           >
             <Link
-              to="/user/register"
+              to="/user/login"
             >
 
-              注册账号
+              已有账号？点击登录
             </Link>
           </div>
         </LoginForm>

@@ -13,8 +13,8 @@ import org.springframework.context.annotation.Configuration;
 /**
  * 腾讯云对象存储客户端
  *
- * @author <a href="https://github.com/liyupi">程序员lora</a>
- * @from <a href="https://yupi.icu">编程导航知识星球</a>
+ * @auaor lora
+ *
  */
 @Configuration
 @ConfigurationProperties(prefix = "cos.client")
