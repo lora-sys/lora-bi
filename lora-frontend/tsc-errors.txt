@@ -1,0 +1,143 @@
+node_modules/.pnpm/@ant-design+pro-form@2.32.0_0e5d6ba94dd6e109c3375e252cbc200e/node_modules/@ant-design/pro-form/es/components/Cascader/index.d.ts(12,28): error TS2307: Cannot find module '../../../../utils/src' or its corresponding type declarations.
+node_modules/.pnpm/@ant-design+pro-form@2.32.0_0e5d6ba94dd6e109c3375e252cbc200e/node_modules/@ant-design/pro-form/es/components/Cascader/index.d.ts(15,35): error TS2694: Namespace '"D:/lora\u9879\u76EE/lora-bi/lora-frontend/src/components/index"' has no exported member 'ProFormItemProps'.
+node_modules/.pnpm/@ant-design+pro-form@2.32.0_0e5d6ba94dd6e109c3375e252cbc200e/node_modules/@ant-design/pro-form/es/components/ColorPicker/index.d.ts(25,28): error TS2307: Cannot find module '../../../../utils/src' or its corresponding type declarations.
+node_modules/.pnpm/@ant-design+pro-form@2.32.0_0e5d6ba94dd6e109c3375e252cbc200e/node_modules/@ant-design/pro-form/es/components/ColorPicker/index.d.ts(28,35): error TS2694: Namespace '"D:/lora\u9879\u76EE/lora-bi/lora-frontend/src/components/index"' has no exported member 'ProFormItemProps'.
+node_modules/.pnpm/@ant-design+pro-form@2.32.0_0e5d6ba94dd6e109c3375e252cbc200e/node_modules/@ant-design/pro-form/es/components/DatePicker/index.d.ts(6,58): error TS2307: Cannot find module 'src' or its corresponding type declarations.
+node_modules/.pnpm/@ant-design+pro-form@2.32.0_0e5d6ba94dd6e109c3375e252cbc200e/node_modules/@ant-design/pro-form/es/components/Digit/index.d.ts(16,28): error TS2307: Cannot find module '../../../../utils/src' or its corresponding type declarations.
+node_modules/.pnpm/@ant-design+pro-form@2.32.0_0e5d6ba94dd6e109c3375e252cbc200e/node_modules/@ant-design/pro-form/es/components/Digit/index.d.ts(19,35): error TS2694: Namespace '"D:/lora\u9879\u76EE/lora-bi/lora-frontend/src/components/index"' has no exported member 'ProFormItemProps'.
+node_modules/.pnpm/@ant-design+pro-form@2.32.0_0e5d6ba94dd6e109c3375e252cbc200e/node_modules/@ant-design/pro-form/es/components/DigitRange/index.d.ts(27,28): error TS2307: Cannot find module '../../../../utils/src' or its corresponding type declarations.
+node_modules/.pnpm/@ant-design+pro-form@2.32.0_0e5d6ba94dd6e109c3375e252cbc200e/node_modules/@ant-design/pro-form/es/components/DigitRange/index.d.ts(30,35): error TS2694: Namespace '"D:/lora\u9879\u76EE/lora-bi/lora-frontend/src/components/index"' has no exported member 'ProFormItemProps'.
+node_modules/.pnpm/@ant-design+pro-form@2.32.0_0e5d6ba94dd6e109c3375e252cbc200e/node_modules/@ant-design/pro-form/es/components/FormItemRender/index.d.ts(128,24): error TS2307: Cannot find module '../../../../utils/src' or its corresponding type declarations.
+node_modules/.pnpm/@ant-design+pro-form@2.32.0_0e5d6ba94dd6e109c3375e252cbc200e/node_modules/@ant-design/pro-form/es/components/FormItemRender/index.d.ts(129,24): error TS2307: Cannot find module '../../../../utils/src' or its corresponding type declarations.
+node_modules/.pnpm/@ant-design+pro-form@2.32.0_0e5d6ba94dd6e109c3375e252cbc200e/node_modules/@ant-design/pro-form/es/components/FormItemRender/index.d.ts(131,25): error TS2307: Cannot find module 'src' or its corresponding type declarations.
+node_modules/.pnpm/@ant-design+pro-form@2.32.0_0e5d6ba94dd6e109c3375e252cbc200e/node_modules/@ant-design/pro-form/es/components/FormItemRender/index.d.ts(137,27): error TS2307: Cannot find module '../../../../utils/src' or its corresponding type declarations.
+node_modules/.pnpm/@ant-design+pro-form@2.32.0_0e5d6ba94dd6e109c3375e252cbc200e/node_modules/@ant-design/pro-form/es/components/Money/index.d.ts(19,28): error TS2307: Cannot find module '../../../../utils/src' or its corresponding type declarations.
+node_modules/.pnpm/@ant-design+pro-form@2.32.0_0e5d6ba94dd6e109c3375e252cbc200e/node_modules/@ant-design/pro-form/es/components/Money/index.d.ts(22,35): error TS2694: Namespace '"D:/lora\u9879\u76EE/lora-bi/lora-frontend/src/components/index"' has no exported member 'ProFormItemProps'.
+node_modules/.pnpm/@ant-design+pro-form@2.32.0_0e5d6ba94dd6e109c3375e252cbc200e/node_modules/@ant-design/pro-form/es/components/Radio/index.d.ts(22,35): error TS2694: Namespace '"D:/lora\u9879\u76EE/lora-bi/lora-frontend/src/components/index"' has no exported member 'ProFormItemProps'.
+node_modules/.pnpm/@ant-design+pro-form@2.32.0_0e5d6ba94dd6e109c3375e252cbc200e/node_modules/@ant-design/pro-form/es/components/Radio/index.d.ts(36,35): error TS2694: Namespace '"D:/lora\u9879\u76EE/lora-bi/lora-frontend/src/components/index"' has no exported member 'ProFormItemProps'.
+node_modules/.pnpm/@ant-design+pro-form@2.32.0_0e5d6ba94dd6e109c3375e252cbc200e/node_modules/@ant-design/pro-form/es/components/Rate/index.d.ts(11,28): error TS2307: Cannot find module '../../../../utils/src' or its corresponding type declarations.
+node_modules/.pnpm/@ant-design+pro-form@2.32.0_0e5d6ba94dd6e109c3375e252cbc200e/node_modules/@ant-design/pro-form/es/components/Rate/index.d.ts(14,35): error TS2694: Namespace '"D:/lora\u9879\u76EE/lora-bi/lora-frontend/src/components/index"' has no exported member 'ProFormItemProps'.
+node_modules/.pnpm/@ant-design+pro-form@2.32.0_0e5d6ba94dd6e109c3375e252cbc200e/node_modules/@ant-design/pro-form/es/components/Slider/index.d.ts(26,28): error TS2307: Cannot find module '../../../../utils/src' or its corresponding type declarations.
+node_modules/.pnpm/@ant-design+pro-form@2.32.0_0e5d6ba94dd6e109c3375e252cbc200e/node_modules/@ant-design/pro-form/es/components/Slider/index.d.ts(29,35): error TS2694: Namespace '"D:/lora\u9879\u76EE/lora-bi/lora-frontend/src/components/index"' has no exported member 'ProFormItemProps'.
+node_modules/.pnpm/@ant-design+pro-form@2.32.0_0e5d6ba94dd6e109c3375e252cbc200e/node_modules/@ant-design/pro-form/es/components/Submitter/index.d.ts(29,13): error TS2503: Cannot find namespace 'JSX'.
+node_modules/.pnpm/@ant-design+pro-form@2.32.0_0e5d6ba94dd6e109c3375e252cbc200e/node_modules/@ant-design/pro-form/es/components/TextArea/index.d.ts(12,28): error TS2307: Cannot find module '../../../../utils/src' or its corresponding type declarations.
+node_modules/.pnpm/@ant-design+pro-form@2.32.0_0e5d6ba94dd6e109c3375e252cbc200e/node_modules/@ant-design/pro-form/es/components/TextArea/index.d.ts(15,35): error TS2694: Namespace '"D:/lora\u9879\u76EE/lora-bi/lora-frontend/src/components/index"' has no exported member 'ProFormItemProps'.
+node_modules/.pnpm/@ant-design+pro-form@2.32.0_0e5d6ba94dd6e109c3375e252cbc200e/node_modules/@ant-design/pro-form/es/layouts/DrawerForm/index.d.ts(25,15): error TS2503: Cannot find namespace 'JSX'.
+node_modules/.pnpm/@ant-design+pro-form@2.32.0_0e5d6ba94dd6e109c3375e252cbc200e/node_modules/@ant-design/pro-form/es/layouts/index.d.ts(18,62): error TS2307: Cannot find module 'src' or its corresponding type declarations.
+node_modules/.pnpm/@ant-design+pro-form@2.32.0_0e5d6ba94dd6e109c3375e252cbc200e/node_modules/@ant-design/pro-form/es/layouts/ModalForm/index.d.ts(20,15): error TS2503: Cannot find namespace 'JSX'.
+node_modules/.pnpm/@ant-design+pro-form@2.32.0_0e5d6ba94dd6e109c3375e252cbc200e/node_modules/@ant-design/pro-form/es/layouts/ProForm/index.d.ts(9,32): error TS2307: Cannot find module 'src' or its corresponding type declarations.
+node_modules/.pnpm/@ant-design+pro-form@2.32.0_0e5d6ba94dd6e109c3375e252cbc200e/node_modules/@ant-design/pro-form/es/layouts/ProForm/index.d.ts(11,31): error TS2307: Cannot find module 'src/components/FormItem' or its corresponding type declarations.
+node_modules/.pnpm/@ant-design+pro-form@2.32.0_0e5d6ba94dd6e109c3375e252cbc200e/node_modules/@ant-design/pro-form/es/typing.d.ts(87,46): error TS2503: Cannot find namespace 'JSX'.
+node_modules/.pnpm/@ant-design+pro-layout@7.22_7546c5a9f8b66ef61d2f621dd367f8b4/node_modules/@ant-design/pro-layout/es/components/FooterToolbar/index.d.ts(12,13): error TS2503: Cannot find namespace 'JSX'.
+node_modules/.pnpm/@ant-design+pro-layout@7.22_7546c5a9f8b66ef61d2f621dd367f8b4/node_modules/@ant-design/pro-layout/es/ProLayout.d.ts(54,30): error TS2503: Cannot find namespace 'JSX'.
+node_modules/.pnpm/@ant-design+pro-layout@7.22_7546c5a9f8b66ef61d2f621dd367f8b4/node_modules/@ant-design/pro-layout/es/ProLayout.d.ts(54,78): error TS2503: Cannot find namespace 'JSX'.
+node_modules/.pnpm/@ant-design+pro-list@2.6.10_bda2f3c31806fbd2c2f28c56cf6c0b3f/node_modules/@ant-design/pro-list/es/Item.d.ts(9,35): error TS2503: Cannot find namespace 'JSX'.
+node_modules/.pnpm/@ant-design+pro-list@2.6.10_bda2f3c31806fbd2c2f28c56cf6c0b3f/node_modules/@ant-design/pro-list/es/Item.d.ts(54,71): error TS2503: Cannot find namespace 'JSX'.
+node_modules/.pnpm/@ant-design+pro-list@2.6.10_bda2f3c31806fbd2c2f28c56cf6c0b3f/node_modules/@ant-design/pro-list/es/Item.d.ts(55,70): error TS2503: Cannot find namespace 'JSX'.
+node_modules/.pnpm/@ant-design+pro-provider@2._7c789891a1f1a3ff79184591525d5ac0/node_modules/@ant-design/pro-provider/es/index.d.ts(83,90): error TS2503: Cannot find namespace 'JSX'.
+node_modules/.pnpm/@ant-design+pro-provider@2._7c789891a1f1a3ff79184591525d5ac0/node_modules/@ant-design/pro-provider/es/index.d.ts(83,106): error TS2503: Cannot find namespace 'JSX'.
+node_modules/.pnpm/@ant-design+pro-provider@2._7c789891a1f1a3ff79184591525d5ac0/node_modules/@ant-design/pro-provider/es/index.d.ts(91,70): error TS2503: Cannot find namespace 'JSX'.
+node_modules/.pnpm/@ant-design+pro-provider@2._7c789891a1f1a3ff79184591525d5ac0/node_modules/@ant-design/pro-provider/es/index.d.ts(91,86): error TS2503: Cannot find namespace 'JSX'.
+node_modules/.pnpm/@ant-design+pro-table@3.21._61279bd552b64c3f3a6a92ef5a3a5520/node_modules/@ant-design/pro-table/es/components/EditableTable/index.d.ts(89,19): error TS2503: Cannot find namespace 'JSX'.
+node_modules/.pnpm/@ant-design+pro-table@3.21._61279bd552b64c3f3a6a92ef5a3a5520/node_modules/@ant-design/pro-table/es/typing.d.ts(176,80): error TS2503: Cannot find namespace 'JSX'.
+node_modules/.pnpm/@ant-design+pro-table@3.21._61279bd552b64c3f3a6a92ef5a3a5520/node_modules/@ant-design/pro-table/es/typing.d.ts(179,18): error TS2503: Cannot find namespace 'JSX'.
+node_modules/.pnpm/@ant-design+pro-table@3.21._61279bd552b64c3f3a6a92ef5a3a5520/node_modules/@ant-design/pro-table/es/typing.d.ts(180,16): error TS2503: Cannot find namespace 'JSX'.
+node_modules/.pnpm/@ant-design+pro-table@3.21._61279bd552b64c3f3a6a92ef5a3a5520/node_modules/@ant-design/pro-table/es/typing.d.ts(181,16): error TS2503: Cannot find namespace 'JSX'.
+node_modules/.pnpm/@ant-design+pro-table@3.21._61279bd552b64c3f3a6a92ef5a3a5520/node_modules/@ant-design/pro-table/es/typing.d.ts(186,67): error TS2503: Cannot find namespace 'JSX'.
+node_modules/.pnpm/@ant-design+pro-table@3.21._61279bd552b64c3f3a6a92ef5a3a5520/node_modules/@ant-design/pro-table/es/typing.d.ts(186,83): error TS2503: Cannot find namespace 'JSX'.
+node_modules/.pnpm/@ant-design+pro-table@3.21._61279bd552b64c3f3a6a92ef5a3a5520/node_modules/@ant-design/pro-table/es/typing.d.ts(198,85): error TS2503: Cannot find namespace 'JSX'.
+node_modules/.pnpm/@ant-design+pro-utils@2.18._5ab6d60682a3fedd066389787b4305d2/node_modules/@ant-design/pro-utils/es/components/DropdownFooter/index.d.ts(2,123): error TS2503: Cannot find namespace 'JSX'.
+node_modules/.pnpm/@ant-design+pro-utils@2.18._5ab6d60682a3fedd066389787b4305d2/node_modules/@ant-design/pro-utils/es/components/FilterDropdown/index.d.ts(5,119): error TS2503: Cannot find namespace 'JSX'.
+node_modules/.pnpm/@ant-design+pro-utils@2.18._5ab6d60682a3fedd066389787b4305d2/node_modules/@ant-design/pro-utils/es/typing.d.ts(486,95): error TS2503: Cannot find namespace 'JSX'.
+node_modules/.pnpm/@umijs+bundler-utils@4.5.3/node_modules/@umijs/bundler-utils/compiled/http-proxy-middleware/dist/index.d.ts(3,15): error TS2307: Cannot find module './handlers' or its corresponding type declarations.
+node_modules/.pnpm/@umijs+bundler-utils@4.5.3/node_modules/@umijs/bundler-utils/dist/https.d.ts(4,43): error TS7016: Could not find a declaration file for module 'spdy'. 'D:/lora项目/lora-bi/lora-frontend/node_modules/.pnpm/spdy@4.0.2/node_modules/spdy/lib/spdy.js' implicitly has an 'any' type.
+  Try `npm i --save-dev @types/spdy` if it exists or add a new declaration (.d.ts) file containing `declare module 'spdy';`
+node_modules/.pnpm/@umijs+bundler-utils@4.5.3/node_modules/@umijs/bundler-utils/dist/https.d.ts(9,114): error TS7016: Could not find a declaration file for module 'spdy'. 'D:/lora项目/lora-bi/lora-frontend/node_modules/.pnpm/spdy@4.0.2/node_modules/spdy/lib/spdy.js' implicitly has an 'any' type.
+  Try `npm i --save-dev @types/spdy` if it exists or add a new declaration (.d.ts) file containing `declare module 'spdy';`
+node_modules/.pnpm/@umijs+bundler-webpack@4.5._0e2dbee913981b6d1218043c28baf0e2/node_modules/@umijs/bundler-webpack/compiled/webpack-5-chain/types/index.d.ts(7,8): error TS2307: Cannot find module '@umijs/bunder-webpack/compiled/webpack' or its corresponding type declarations.
+node_modules/.pnpm/@umijs+bundler-webpack@4.5._0e2dbee913981b6d1218043c28baf0e2/node_modules/@umijs/bundler-webpack/compiled/webpack/schema-utils/declarations/validate.d.ts(4,34): error TS2307: Cannot find module '../../ajv' or its corresponding type declarations.
+node_modules/.pnpm/@umijs+bundler-webpack@4.5._0e2dbee913981b6d1218043c28baf0e2/node_modules/@umijs/bundler-webpack/compiled/webpack/types.d.ts(87,46): error TS2307: Cannot find module './schema-utils' or its corresponding type declarations.
+node_modules/.pnpm/@umijs+bundler-webpack@4.5._0e2dbee913981b6d1218043c28baf0e2/node_modules/@umijs/bundler-webpack/compiled/webpack/types.d.ts(11096,2): error TS2416: Property '[Symbol.iterator]' in type 'SortableSet<T>' is not assignable to the same property in base type 'Set<T>'.
+  Type '() => IterableIterator<T>' is not assignable to type '() => SetIterator<T>'.
+    Type 'IterableIterator<T>' is missing the following properties from type 'SetIterator<T>': map, filter, take, drop, and 9 more.
+node_modules/.pnpm/@umijs+bundler-webpack@4.5._0e2dbee913981b6d1218043c28baf0e2/node_modules/@umijs/bundler-webpack/compiled/webpack/types.d.ts(12306,15): error TS2417: Class static side 'typeof WebpackError' incorrectly extends base class static side '{ readonly prototype: Error; isError(error: unknown): error is Error; captureStackTrace(targetObject: object, constructorOpt?: Function | undefined): void; prepareStackTrace(err: Error, stackTraces: CallSite[]): any; stackTraceLimit: number; }'.
+  Types of property 'prepareStackTrace' are incompatible.
+    Type '((err: Error, stackTraces: CallSite[]) => any) | undefined' is not assignable to type '(err: Error, stackTraces: CallSite[]) => any'.
+      Type 'undefined' is not assignable to type '(err: Error, stackTraces: CallSite[]) => any'.
+node_modules/.pnpm/@umijs+bundler-webpack@4.5._0e2dbee913981b6d1218043c28baf0e2/node_modules/@umijs/bundler-webpack/dist/types.d.ts(1,43): error TS2307: Cannot find module '@swc/core' or its corresponding type declarations.
+node_modules/.pnpm/@umijs+bundler-webpack@4.5._0e2dbee913981b6d1218043c28baf0e2/node_modules/@umijs/bundler-webpack/dist/types.d.ts(4,43): error TS2307: Cannot find module 'webpack-bundle-analyzer' or its corresponding type declarations.
+node_modules/.pnpm/@umijs+utils@4.5.3/node_modules/@umijs/utils/compiled/@ampproject/remapping/dist/types/source-map.d.ts(1,33): error TS2307: Cannot find module '../../@jridgewell/gen-mapping' or its corresponding type declarations.
+node_modules/.pnpm/@umijs+utils@4.5.3/node_modules/@umijs/utils/compiled/@ampproject/remapping/dist/types/types.d.ts(1,37): error TS2307: Cannot find module '../../@jridgewell/trace-mapping' or its corresponding type declarations.
+node_modules/.pnpm/@umijs+utils@4.5.3/node_modules/@umijs/utils/compiled/@clack/prompts/dist/index.d.ts(1,26): error TS2307: Cannot find module '@clack/core' or its corresponding type declarations.
+node_modules/.pnpm/@umijs+utils@4.5.3/node_modules/@umijs/utils/compiled/cheerio/lib/api/attributes.d.ts(6,36): error TS2307: Cannot find module '../../domhandler' or its corresponding type declarations.
+node_modules/.pnpm/@umijs+utils@4.5.3/node_modules/@umijs/utils/compiled/cheerio/lib/api/css.d.ts(1,36): error TS2307: Cannot find module '../../domhandler' or its corresponding type declarations.
+node_modules/.pnpm/@umijs+utils@4.5.3/node_modules/@umijs/utils/compiled/cheerio/lib/api/forms.d.ts(1,27): error TS2307: Cannot find module '../../domhandler' or its corresponding type declarations.
+node_modules/.pnpm/@umijs+utils@4.5.3/node_modules/@umijs/utils/compiled/cheerio/lib/api/manipulation.d.ts(6,22): error TS2307: Cannot find module '../../domhandler' or its corresponding type declarations.
+node_modules/.pnpm/@umijs+utils@4.5.3/node_modules/@umijs/utils/compiled/cheerio/lib/api/traversing.d.ts(6,41): error TS2307: Cannot find module '../../domhandler' or its corresponding type declarations.
+node_modules/.pnpm/@umijs+utils@4.5.3/node_modules/@umijs/utils/compiled/cheerio/lib/cheerio.d.ts(2,37): error TS2307: Cannot find module '../domhandler' or its corresponding type declarations.
+node_modules/.pnpm/@umijs+utils@4.5.3/node_modules/@umijs/utils/compiled/cheerio/lib/index.d.ts(19,64): error TS7016: Could not find a declaration file for module 'domhandler'. 'D:/lora项目/lora-bi/lora-frontend/node_modules/.pnpm/domhandler@2.4.2/node_modules/domhandler/index.js' implicitly has an 'any' type.
+  Try `npm i --save-dev @types/domhandler` if it exists or add a new declaration (.d.ts) file containing `declare module 'domhandler';`
+node_modules/.pnpm/@umijs+utils@4.5.3/node_modules/@umijs/utils/compiled/cheerio/lib/load.d.ts(5,46): error TS2307: Cannot find module '../domhandler' or its corresponding type declarations.
+node_modules/.pnpm/@umijs+utils@4.5.3/node_modules/@umijs/utils/compiled/cheerio/lib/options.d.ts(1,40): error TS2307: Cannot find module '../domhandler' or its corresponding type declarations.
+node_modules/.pnpm/@umijs+utils@4.5.3/node_modules/@umijs/utils/compiled/cheerio/lib/options.d.ts(2,36): error TS2307: Cannot find module '../htmlparser2' or its corresponding type declarations.
+node_modules/.pnpm/@umijs+utils@4.5.3/node_modules/@umijs/utils/compiled/cheerio/lib/static.d.ts(2,32): error TS2307: Cannot find module '../domhandler' or its corresponding type declarations.
+node_modules/.pnpm/@umijs+utils@4.5.3/node_modules/@umijs/utils/compiled/cheerio/lib/types.d.ts(10,27): error TS2307: Cannot find module '../domhandler' or its corresponding type declarations.
+node_modules/.pnpm/@umijs+utils@4.5.3/node_modules/@umijs/utils/compiled/fs-extra/index.d.ts(20,34): error TS2307: Cannot find module './jsonfile/utils' or its corresponding type declarations.
+node_modules/.pnpm/@umijs+utils@4.5.3/node_modules/@umijs/utils/compiled/fs-extra/index.d.ts(1007,86): error TS7016: Could not find a declaration file for module 'jsonfile'. 'D:/lora项目/lora-bi/lora-frontend/node_modules/.pnpm/jsonfile@6.2.0/node_modules/jsonfile/index.js' implicitly has an 'any' type.
+  Try `npm i --save-dev @types/jsonfile` if it exists or add a new declaration (.d.ts) file containing `declare module 'jsonfile';`
+node_modules/.pnpm/@umijs+utils@4.5.3/node_modules/@umijs/utils/compiled/lodash/index.d.ts(45,15): error TS2428: All declarations of 'WeakMap' must have identical type parameters.
+node_modules/.pnpm/@umijs+utils@4.5.3/node_modules/@umijs/utils/compiled/tsconfig-paths/lib/index.d.ts(1,69): error TS2307: Cannot find module './match-path-sync' or its corresponding type declarations.
+node_modules/.pnpm/@umijs+utils@4.5.3/node_modules/@umijs/utils/compiled/tsconfig-paths/lib/index.d.ts(2,84): error TS2307: Cannot find module './match-path-async' or its corresponding type declarations.
+node_modules/.pnpm/@umijs+utils@4.5.3/node_modules/@umijs/utils/compiled/tsconfig-paths/lib/index.d.ts(3,26): error TS2307: Cannot find module './register' or its corresponding type declarations.
+node_modules/.pnpm/@umijs+utils@4.5.3/node_modules/@umijs/utils/compiled/tsconfig-paths/lib/index.d.ts(4,100): error TS2307: Cannot find module './config-loader' or its corresponding type declarations.
+node_modules/.pnpm/@umijs+utils@4.5.3/node_modules/@umijs/utils/compiled/tsconfig-paths/lib/index.d.ts(5,79): error TS2307: Cannot find module './filesystem' or its corresponding type declarations.
+node_modules/.pnpm/antd-style@3.7.1_@types+rea_a1b4caef7e23aa45d8d11a24dc056c99/node_modules/antd-style/lib/functions/extractStaticStyle.d.ts(14,12): error TS2503: Cannot find namespace 'JSX'.
+node_modules/.pnpm/chokidar@3.5.3/node_modules/chokidar/types/index.d.ts(9,14): error TS2420: Class 'import("D:/lora\u9879\u76EE/lora-bi/lora-frontend/node_modules/.pnpm/chokidar@3.5.3/node_modules/chokidar/types/index").FSWatcher' incorrectly implements interface 'import("fs").FSWatcher'.
+  Type 'FSWatcher' is missing the following properties from type 'FSWatcher': ref, unref
+node_modules/.pnpm/echarts-for-react@3.0.5_echarts@6.0.0_react@19.2.0/node_modules/echarts-for-react/lib/core.d.ts(47,15): error TS2503: Cannot find namespace 'JSX'.
+node_modules/.pnpm/echarts@6.0.0/node_modules/echarts/index.d.ts(23,1): error TS1203: Export assignment cannot be used when targeting ECMAScript modules. Consider using 'export default' or another module format instead.
+node_modules/.pnpm/rc-field-form@2.7.1_react-d_9f04261e3285dcb1feb518fbf43e4161/node_modules/rc-field-form/es/Form.d.ts(4,59): error TS2503: Cannot find namespace 'JSX'.
+node_modules/.pnpm/rc-field-form@2.7.1_react-d_9f04261e3285dcb1feb518fbf43e4161/node_modules/rc-field-form/es/List.d.ts(18,81): error TS2503: Cannot find namespace 'JSX'.
+node_modules/.pnpm/rc-field-form@2.7.1_react-d_9f04261e3285dcb1feb518fbf43e4161/node_modules/rc-field-form/lib/Form.d.ts(4,59): error TS2503: Cannot find namespace 'JSX'.
+node_modules/.pnpm/rc-picker@4.11.3_date-fns@2_ce4523ce060ead378e33da8735afcae3/node_modules/rc-picker/lib/PickerPanel/index.d.ts(40,18): error TS2430: Interface 'SinglePickerPanelProps<DateType>' incorrectly extends interface 'BasePickerPanelProps<DateType>'.
+  Types of property 'defaultValue' are incompatible.
+    Type 'DateType | null | undefined' is not assignable to type 'DateType | undefined'.
+      Type 'null' is not assignable to type 'DateType | undefined'.
+node_modules/.pnpm/rc-select@14.16.8_react-dom_03802ae2d97e310bb40ee230e7fef06a/node_modules/rc-select/lib/BaseSelect/index.d.ts(73,29): error TS2503: Cannot find namespace 'JSX'.
+node_modules/.pnpm/rc-select@14.16.8_react-dom_03802ae2d97e310bb40ee230e7fef06a/node_modules/rc-select/lib/BaseSelect/index.d.ts(75,32): error TS2503: Cannot find namespace 'JSX'.
+node_modules/.pnpm/rc-table@7.54.0_react-dom@19.2.0_react@19.2.0__react@19.2.0/node_modules/rc-table/lib/Table.d.ts(107,69): error TS2344: Type '<RecordType extends DefaultRecordType>(tableProps: TableProps<RecordType>, ref: Ref<Reference>) => Element' does not satisfy the constraint 'ComponentType<any>'.
+  Type '<RecordType extends DefaultRecordType>(tableProps: TableProps<RecordType>, ref: Ref<Reference>) => Element' is not assignable to type 'FunctionComponent<any>'.
+    Target signature provides too few arguments. Expected 2 or more, but got 1.
+node_modules/.pnpm/react-helmet-async@1.3.0_re_252573d092e1ca3191c0538806ed497c/node_modules/react-helmet-async/index.d.ts(8,20): error TS2503: Cannot find namespace 'JSX'.
+node_modules/.pnpm/react-helmet-async@1.3.0_re_252573d092e1ca3191c0538806ed497c/node_modules/react-helmet-async/index.d.ts(10,20): error TS2503: Cannot find namespace 'JSX'.
+node_modules/.pnpm/react-helmet-async@1.3.0_re_252573d092e1ca3191c0538806ed497c/node_modules/react-helmet-async/index.d.ts(12,20): error TS2503: Cannot find namespace 'JSX'.
+node_modules/.pnpm/react-helmet-async@1.3.0_re_252573d092e1ca3191c0538806ed497c/node_modules/react-helmet-async/index.d.ts(14,20): error TS2503: Cannot find namespace 'JSX'.
+node_modules/.pnpm/react-router-dom@6.3.0_reac_beb70b932a60871592d5dec302f52003/node_modules/react-router-dom/index.d.ts(22,93): error TS2503: Cannot find namespace 'JSX'.
+node_modules/.pnpm/react-router-dom@6.3.0_reac_beb70b932a60871592d5dec302f52003/node_modules/react-router-dom/index.d.ts(32,86): error TS2503: Cannot find namespace 'JSX'.
+node_modules/.pnpm/react-router-dom@6.3.0_reac_beb70b932a60871592d5dec302f52003/node_modules/react-router-dom/index.d.ts(44,86): error TS2503: Cannot find namespace 'JSX'.
+node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.es2015.collection.d.ts(62,11): error TS2428: All declarations of 'WeakMap' must have identical type parameters.
+node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.es2015.iterable.d.ts(186,11): error TS2428: All declarations of 'WeakMap' must have identical type parameters.
+node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.es2015.symbol.wellknown.d.ts(140,11): error TS2428: All declarations of 'WeakMap' must have identical type parameters.
+node_modules/.pnpm/vite@4.5.2_@types+node@24.1_a8ed9721c6f5d5a75fb01fc3ada971da/node_modules/vite/dist/node/index.d.ts(843,22): error TS2420: Class 'import("D:/lora\u9879\u76EE/lora-bi/lora-frontend/node_modules/.pnpm/vite@4.5.2_@types+node@24.1_a8ed9721c6f5d5a75fb01fc3ada971da/node_modules/vite/dist/node/index").FSWatcher' incorrectly implements interface 'import("fs").FSWatcher'.
+  Type 'FSWatcher' is missing the following properties from type 'FSWatcher': ref, unref
+src/.umi/plugin-layout/types.d.ts(17,30): error TS2503: Cannot find namespace 'JSX'.
+src/.umi/plugin-layout/types.d.ts(18,22): error TS2503: Cannot find namespace 'JSX'.
+src/.umi/plugin-layout/types.d.ts(19,17): error TS2503: Cannot find namespace 'JSX'.
+src/.umi/plugin-layout/types.d.ts(23,14): error TS2503: Cannot find namespace 'JSX'.
+src/.umi/plugin-layout/types.d.ts(31,12): error TS2503: Cannot find namespace 'JSX'.
+src/.umi/plugin-layout/types.d.ts(36,12): error TS2503: Cannot find namespace 'JSX'.
+src/components/index.ts(11,56): error TS2304: Cannot find name 'SelectLang'.
+src/components/RightContent/index.tsx(6,6): error TS2304: Cannot find name 'UmiSelectLang'.
+src/pages/ChartManage/index.tsx(71,19): error TS2339: Property 'text' does not exist on type 'Chart'.
+src/pages/ChartManage/index.tsx(350,11): error TS2322: Type '({ title: string; dataIndex: string; key: string; render: (text: number) => Element; sorter: boolean; filters?: undefined; onFilter?: undefined; ellipsis?: undefined; } | { title: string; ... 6 more ...; ellipsis?: undefined; } | { ...; } | { ...; } | { ...; } | { ...; })[]' is not assignable to type '(ColumnGroupType<Chart> | ColumnType<Chart>)[]'.
+  Type '{ title: string; dataIndex: string; key: string; render: (text: number) => Element; sorter: boolean; filters?: undefined; onFilter?: undefined; ellipsis?: undefined; } | { title: string; ... 6 more ...; ellipsis?: undefined; } | { ...; } | { ...; } | { ...; } | { ...; }' is not assignable to type 'ColumnGroupType<Chart> | ColumnType<Chart>'.
+    Type '{ title: string; dataIndex: string; key: string; render: (text: string) => JSX.Element; filters: { text: string; value: string; }[]; onFilter: (value: string, record: API.Chart) => boolean; sorter?: undefined; ellipsis?: undefined; }' is not assignable to type 'ColumnGroupType<Chart> | ColumnType<Chart>'.
+      Type '{ title: string; dataIndex: string; key: string; render: (text: string) => JSX.Element; filters: { text: string; value: string; }[]; onFilter: (value: string, record: API.Chart) => boolean; sorter?: undefined; ellipsis?: undefined; }' is not assignable to type 'ColumnType<Chart>'.
+        Types of property 'onFilter' are incompatible.
+          Type '(value: string, record: API.Chart) => boolean' is not assignable to type '(value: boolean | Key, record: Chart) => boolean'.
+            Types of parameters 'value' and 'value' are incompatible.
+              Type 'boolean | Key' is not assignable to type 'string'.
+                Type 'number' is not assignable to type 'string'.
+src/pages/Welcome.tsx(118,29): error TS2339: Property 'settings' does not exist on type '{ currentUser?: LoginUserVO | undefined; }'.
+src/services/lora-bi/typings.d.ts(315,8): error TS2300: Duplicate identifier 'User'.
+src/services/swagger/typings.d.ts(101,8): error TS2300: Duplicate identifier 'User'.
