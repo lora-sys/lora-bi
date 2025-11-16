@@ -1,5 +1,6 @@
 package com.lora.bi.controller;
 
+import cn.hutool.core.io.FileUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.google.gson.Gson;
@@ -12,6 +13,7 @@ import com.lora.bi.constant.CommonConstant;
 import com.lora.bi.constant.UserConstant;
 import com.lora.bi.exception.BusinessException;
 import com.lora.bi.exception.ThrowUtils;
+import com.lora.bi.manager.RedissonLimiterManager;
 import com.lora.bi.model.dto.chart.*;
 import com.lora.bi.model.entity.Chart;
 import com.lora.bi.model.entity.User;
@@ -25,12 +27,16 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
+import java.lang.reflect.Array;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * 帖子接口
@@ -52,6 +58,8 @@ public class ChartController {
     private com.lora.bi.service.AiService aiService;
 
     private final static Gson GSON = new Gson();
+    @Autowired
+    private RedissonLimiterManager redissonLimiterManager;
 
     // region 增删改查
 
@@ -260,14 +268,31 @@ public class ChartController {
         String name = genChartByAIRequest.getName();
         String goal = genChartByAIRequest.getGoal();
         // 校验
+        // 校验文件
+        long size = multipartFile.getSize();
+        String originalFilename = multipartFile.getOriginalFilename();
+
+        // 检查文件大小
+        final long ONE_MB = 1024 * 1024L;
+        if (size > ONE_MB) {
+            ThrowUtils.throwIf(size > ONE_MB, ErrorCode.PARAMS_ERROR, "文件超过一兆");
+        }
+        // 检查原始文件名,校验后缀 aaa.png
+        String suffix = FileUtil.getSuffix(originalFilename);
+        List<String> validSuffix = Arrays.asList("png", "jpg", "jpeg", "gif", "svg");
+
+        ThrowUtils.throwIf(!validSuffix.contains(suffix), ErrorCode.PARAMS_ERROR, "文件后缀非法");
 
         User loginUser = userService.getLoginUser(request);
+        //限流判断，每个用户一个限流器
+        redissonLimiterManager.doRateLimit("genChartByAI"+loginUser.getId());
 
 
         // 校验参数
         ThrowUtils.throwIf(StringUtils.isBlank(name) || name.length() > 100, ErrorCode.PARAMS_ERROR, "名称过长");
         ThrowUtils.throwIf(StringUtils.isBlank(goal), ErrorCode.PARAMS_ERROR, "分析目标不能为空");
         ThrowUtils.throwIf(multipartFile.isEmpty(), ErrorCode.PARAMS_ERROR, "上传的文件不能为空");
+
 
         try {
             //压缩后的数据
@@ -334,50 +359,26 @@ public class ChartController {
 
 
             if (conclusion == null || conclusion.trim().isEmpty()) {
-
                 log.warn("未能从AI响应中提取到分析结论");
-
                 // 这里我们不抛出异常，因为图表配置是主要的，分析结论是次要的
-
             }
-
-
             // 插入数据库
-
             Chart chart = new Chart();
-
             chart.setChartData(csvData);
-
             chart.setGoal(goal);
-
             chart.setChartType(chartType);
-
             chart.setName(name);
-
             chart.setUserId(loginUser.getId());
-
             chart.setGenChart(chartOption);
-
             chart.setGenResult(conclusion);
-
             boolean save = chartService.save(chart);
-
             ThrowUtils.throwIf(!save, ErrorCode.OPERATION_ERROR, "数据图表保存失败");
-
-
             // 构造返回结果
-
             BiGenVO biGenVO = new BiGenVO();
-
             biGenVO.setChartOption(chartOption);
-
             biGenVO.setConclusion(conclusion);
-
             biGenVO.setSuccess(true);
-
             biGenVO.setGenChartByAIRequest(genChartByAIRequest); // 返回请求参数，便于调试
-
-
             return ResultUtils.success(biGenVO);
         } catch (Exception e) {
             log.error("AI生成图表失败", e);
