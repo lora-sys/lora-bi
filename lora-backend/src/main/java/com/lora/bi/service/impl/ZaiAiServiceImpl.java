@@ -1,21 +1,41 @@
 package com.lora.bi.service.impl;
 
+
+
 import ai.z.openapi.ZaiClient;
+
 import ai.z.openapi.service.model.*;
+
 import ai.z.openapi.service.image.CreateImageRequest;
+
 import ai.z.openapi.service.image.ImageResponse;
+
 import ai.z.openapi.core.Constants;
+
+
 import com.lora.bi.model.entity.ChatBot;
+
 import com.lora.bi.service.AiService;
+
 import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.beans.factory.annotation.Autowired;
+
 import org.springframework.beans.factory.annotation.Qualifier;
+
 import org.springframework.beans.factory.annotation.Value;
+
 import org.springframework.stereotype.Service;
+
 import reactor.core.publisher.Flux;
 
+
+
 import java.util.ArrayList;
+
 import java.util.List;
+
+import java.util.concurrent.TimeUnit;
 
 /**
  * z.ai服务实现类
@@ -76,20 +96,34 @@ public class ZaiAiServiceImpl implements AiService {
             ChatCompletionResponse response = zaiClient.chat().createChatCompletion(request);
             log.info("AI服务调用完成");
 
-            if (response.isSuccess()) {
-                String content = response.getData().getChoices().get(0).getMessage().getContent().toString();
-                // 检查内容是否为空
-                if (content == null || content.trim().isEmpty()) {
-                    log.error("AI返回了空内容，响应状态为成功但内容为空");
-                    throw new RuntimeException("AI返回了空内容，请稍后重试");
-                }
-                // 记录AI响应
-                log.info("AI响应内容长度: {}", content.length());
-                log.debug("AI响应内容: {}", content);
-                return content;
-            } else {
-                log.error("调用z.ai API失败: " + response.getMsg());
-                throw new RuntimeException("调用z.ai API失败: " + response.getMsg());
+            if (response.isSuccess()) {
+
+                String content = response.getData().getChoices().get(0).getMessage().getContent().toString();
+
+                // 检查内容是否为空
+
+                if (content == null || content.trim().isEmpty()) {
+
+                    log.error("AI返回了空内容，响应状态为成功但内容为空");
+
+                    throw new RuntimeException("AI返回了空内容，请稍后重试");
+
+                }
+
+                // 记录AI响应
+
+                log.info("AI响应内容长度: {}", content.length());
+
+                log.debug("AI响应内容: {}", content);
+
+                return content;
+
+            } else {
+
+                log.error("调用z.ai API失败: " + response.getMsg());
+
+                throw new RuntimeException("调用z.ai API失败: " + response.getMsg());
+
             }
         } catch (Exception e) {
             log.error("调用z.ai API失败", e);

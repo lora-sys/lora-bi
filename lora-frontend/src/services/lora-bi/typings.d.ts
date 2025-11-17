@@ -1,4 +1,9 @@
 declare namespace API {
+  type addUsingGETParams = {
+    /** name */
+    name?: string;
+  };
+
   type BaseResponseBiGenVO_ = {
     code?: number;
     data?: BiGenVO;
@@ -94,12 +99,14 @@ declare namespace API {
     chartData?: string;
     chartType?: string;
     createTime?: string;
+    execMessage?: string;
     genChart?: string;
     genResult?: string;
     goal?: string;
     id?: number;
     isDelete?: number;
     name?: string;
+    status?: string;
     updateTime?: string;
     userId?: number;
   };
@@ -147,6 +154,12 @@ declare namespace API {
     id?: number;
   };
 
+  type genChartByAIAsyncUsingPOSTParams = {
+    chartType?: string;
+    goal?: string;
+    name?: string;
+  };
+
   type genChartByAIUsingPOSTParams = {
     chartType?: string;
     goal?: string;
@@ -171,6 +184,11 @@ declare namespace API {
   type getUserVOByIdUsingGETParams = {
     /** id */
     id?: number;
+  };
+
+  type getUsingGETParams = {
+    /** name */
+    name?: string;
   };
 
   type LoginUserVO = {

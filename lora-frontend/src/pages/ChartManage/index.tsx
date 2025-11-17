@@ -58,7 +58,7 @@ const ChartManagePage: React.FC = () => {
   };
 
   // 定义表格列
-  const columns = [
+  const columns : any = [
     {
       title: 'ID',
       dataIndex: 'id',
@@ -106,26 +106,70 @@ const ChartManagePage: React.FC = () => {
       onFilter: (value: string, record: API.Chart) => (record.chartType ? record.chartType.includes(value) : false),
     },
     {
+
+      title: '图表状态',
+
+      dataIndex: 'status',
+
+      key: 'status',
+
+      render: (text: string) => (
+
+        <Tag
+          color={
+
+            text === 'succeed' ? 'green' :
+            text === 'failed' ? 'red' :
+            text === 'running' ? 'blue' :
+            'default'
+          }
+        >
+          {text === 'succeed' ? '成功' :
+           text === 'failed' ? '失败' :
+           text === 'running' ? '进行中' :
+           text || '-'}
+        </Tag>
+      ),
+      filters: [
+        { text: '成功', value: 'succeed' },
+        { text: '失败', value: 'failed' },
+        { text: '进行中', value: 'running' },
+      ],
+      onFilter: (value: string, record: API.Chart) => record.status === value,
+    },
+    {
+
       title: '创建时间',
+
       dataIndex: 'createTime',
+
       key: 'createTime',
+
       sorter: true,
+
     },
     {
       title: '操作',
       key: 'action',
-      render: (_, record: API.Chart) => (
+      render: (_ : any, record: API.Chart) => (
         <Space size="middle">
           <a onClick={() => {
             history.push(`/edit-chart/${record.id}`);
           }}>
             编辑
           </a>
-          <a onClick={() => deleteChart(record.id)}>删除</a>
+
+          <a onClick={() => deleteChart(record?.id || 0)}>删除</a>
+
         </Space>
+
       ),
+
     },
+
   ];
+
+
 
   return (
     <div className="chart-manage-page">
@@ -137,8 +181,8 @@ const ChartManagePage: React.FC = () => {
           <Col span={8}>
             <Form layout="inline">
               <Form.Item label="图表名称">
-                <Search 
-                  placeholder="请输入图表名称" 
+                <Search
+                  placeholder="请输入图表名称"
                   onSearch={(value) => {
                     setSearchParams({
                       ...searchParams,
@@ -184,9 +228,9 @@ const ChartManagePage: React.FC = () => {
             </Form>
           </Col>
           <Col span={8} style={{ textAlign: 'right' }}>
-            <Button 
-              type="primary" 
-              icon={<PlusOutlined />} 
+            <Button
+              type="primary"
+              icon={<PlusOutlined />}
               onClick={() => history.push('/add')}
             >
               创建图表

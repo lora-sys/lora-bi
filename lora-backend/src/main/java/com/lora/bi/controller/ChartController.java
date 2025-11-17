@@ -1,5 +1,5 @@
-package com.lora.bi.controller;
 
+package com.lora.bi.controller;
 import cn.hutool.core.io.FileUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -30,13 +30,14 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
-import java.lang.reflect.Array;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.RejectedExecutionException;
+import java.util.concurrent.ThreadPoolExecutor;
 
 /**
  * 帖子接口
@@ -55,10 +56,17 @@ public class ChartController {
     private UserService userService;
 
     @Resource
+
     private com.lora.bi.service.AiService aiService;
 
+    @Resource
+    private ThreadPoolExecutor threadPoolExecutor;
+
+
     private final static Gson GSON = new Gson();
+
     @Autowired
+
     private RedissonLimiterManager redissonLimiterManager;
 
     // region 增删改查
@@ -252,6 +260,164 @@ public class ChartController {
                 sortField);
         return queryWrapper;
     }
+
+
+    /**
+     * 智能分析（异步）
+     *
+     * @param multipartFile
+     * @param genChartByAiRequest
+     * @param request
+     * @return
+     */
+    @PostMapping("/gen/async")
+    public BaseResponse<BiGenVO> genChartByAiAsync(@RequestPart("file") MultipartFile multipartFile,
+                                                      GenChartByAIRequest genChartByAiRequest, HttpServletRequest request) throws IOException {
+        String name = genChartByAiRequest.getName();
+        String goal = genChartByAiRequest.getGoal();
+        String chartType = genChartByAiRequest.getChartType();
+        // 校验
+        ThrowUtils.throwIf(StringUtils.isBlank(goal), ErrorCode.PARAMS_ERROR, "目标为空");
+        ThrowUtils.throwIf(StringUtils.isNotBlank(name) && name.length() > 100, ErrorCode.PARAMS_ERROR, "名称过长");
+        // 校验文件
+        long size = multipartFile.getSize();
+        String originalFilename = multipartFile.getOriginalFilename();
+        // 校验文件大小
+        final long ONE_MB = 1024 * 1024L;
+        ThrowUtils.throwIf(size > ONE_MB, ErrorCode.PARAMS_ERROR, "文件超过 1M");
+        // 校验文件后缀 aaa.png
+        String suffix = FileUtil.getSuffix(originalFilename);
+        final List<String> validFileSuffixList = Arrays.asList("xlsx", "xls");
+        ThrowUtils.throwIf(!validFileSuffixList.contains(suffix), ErrorCode.PARAMS_ERROR, "文件后缀非法");
+        User loginUser = userService.getLoginUser(request);
+        // 限流判断，每个用户一个限流器
+       redissonLimiterManager.doRateLimit("genChartByAi_" + loginUser.getId());
+        // 构造用户输入
+        StringBuilder userInput = new StringBuilder();
+        userInput.append("分析需求：").append("\n");
+        // 拼接分析目标
+        String userGoal = goal;
+        if (StringUtils.isNotBlank(chartType)) {
+            userGoal += "，请使用" + chartType;
+        }
+        userInput.append(userGoal).append("\n");
+        userInput.append("原始数据：").append("\n");
+        // 压缩后的数据
+        String csvData = ExcelUtils.excelToCsv(multipartFile);
+        userInput.append(csvData).append("\n");
+        // 插入到数据库
+        Chart chart = new Chart();
+        chart.setName(name);
+        chart.setGoal(goal);
+        chart.setChartData(csvData);
+        chart.setChartType(chartType);
+        chart.setStatus("wait");
+        chart.setUserId(loginUser.getId());
+        boolean saveResult = chartService.save(chart);
+        ThrowUtils.throwIf(!saveResult, ErrorCode.SYSTEM_ERROR, "图表保存失败");
+        // try 任务队列满了后抛异常
+        // 提交任务
+
+        try {
+        CompletableFuture.runAsync(() -> {
+                try {
+                    Chart newChart = new Chart();
+                    newChart.setId(chart.getId());
+                    newChart.setStatus("running");
+                    newChart.setExecMessage("图表正在生成中");
+                    boolean b = chartService.updateById(newChart);
+                    if (!b) {
+                        handleChartUpdateError(chart.getId(), "更新图表执行中状态失败");
+                    }
+                    // 调用AI服务，使用配置好的chartChatBot进行数据分析
+                    String aiResult = aiService.sendMessage(String.valueOf(userInput));
+                    // 记录AI原始响应的前500个字符，便于调试
+                    if (aiResult != null && aiResult.length() > 0) {
+                        String preview = aiResult.length() > 500 ? aiResult.substring(0, 500) + "..." : aiResult;
+                        log.info("AI原始响应预览: {}", preview);
+                    }
+                    log.info("AI原始响应长度: {}", aiResult != null ? aiResult.length() : 0);
+                    log.debug("AI原始响应内容: {}", aiResult);
+                    // 检查AI是否返回了有效内容
+                    if (aiResult == null || aiResult.trim().isEmpty()) {
+                        log.error("AI返回了空内容，可能API调用失败或超时");
+                        throw new BusinessException(ErrorCode.OPERATION_ERROR, "AI服务未返回有效内容，请稍后重试");
+                    }
+                    // 解析AI响应，提取图表配置和分析结论
+                    String chartOption = AiResponseParser.extractContentByTag(aiResult, "execute");
+                    String conclusion = AiResponseParser.extractContentByTag(aiResult, "text");
+                    log.info("提取的图表配置: {}", chartOption);
+                    log.info("提取的分析结论: {}", conclusion);
+                    log.info("提取的图表配置长度: {}", chartOption != null ? chartOption.length() : 0);
+                    log.info("提取的分析结论长度: {}", conclusion != null ? conclusion.length() : 0);
+
+                    // 检查解析结果是否有效
+                    if (chartOption == null || chartOption.trim().isEmpty()) {
+                        log.error("未能从AI响应中提取到有效的图表配置");
+                        throw new BusinessException(ErrorCode.OPERATION_ERROR, "AI未能生成有效的图表配置，请检查输入数据或稍后重试");
+                    }
+                    if (conclusion == null || conclusion.trim().isEmpty()) {
+                        log.warn("未能从AI响应中提取到分析结论");
+                        // 这里我们不抛出异常，因为图表配置是主要的，分析结论是次要的
+                    }
+                    // 更新图表信息
+                    Chart updateChart = new Chart();
+                    updateChart.setId(chart.getId());
+                    updateChart.setStatus("succeed");
+                    updateChart.setGenChart(chartOption);
+                    updateChart.setGenResult(conclusion);
+                    updateChart.setExecMessage("AI图表生成成功");
+                    boolean c = chartService.updateById(updateChart);
+                    if (!c) {
+                        handleChartUpdateError(chart.getId(), "更新图表成功状态失败");
+                    }
+                } catch (Exception e) {
+                    log.error("ai图表生成任务执行失败", e);
+                    handleChartUpdateError(chart.getId(), "ai生成图表失败:" + e.getMessage());
+                }
+        }, threadPoolExecutor);
+    } catch (RejectedExecutionException e) {
+        log.error("任务队列已经满了，无法提交ai图表生成任务",e);
+        // 更新数据库状态
+        handleChartUpdateError(chart.getId(),"系统繁忙，任务队列已经满了，请稍后重试");
+        throw new BusinessException(ErrorCode.OPERATION_ERROR,"系统繁忙，任务队列已满，请稍后重试");
+
+    }
+
+        BiGenVO biGenVO = new BiGenVO();
+        biGenVO.setSuccess(true);
+        return ResultUtils.success(biGenVO);
+    }
+
+    private void handleChartUpdateError(long chartId, String execMessage) {
+        Chart updateChart = new Chart();
+        updateChart.setId(chartId);
+        updateChart.setStatus("failed");
+        updateChart.setExecMessage(execMessage);
+        boolean updateResult = chartService.updateById(updateChart);
+        if (!updateResult) {
+            log.error("更新图表失败状态失败" + chartId + "," + execMessage);
+        }
+
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     /**
      * 智能分析，根据用户上传数据类型,结合用户的建议图表类型和提示词，智能生成图表

@@ -72,6 +72,19 @@ public class Chart {
      */
     private Integer isDelete;
 
+    /**
+     *
+     *   执行状态
+     *
+     */
+    private String status;
+
+    /**
+     *  执行信息
+     */
+    private String execMessage;
+
+
     private static final long serialVersionUID = 1L;
 
 }

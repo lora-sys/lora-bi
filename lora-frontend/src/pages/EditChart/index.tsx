@@ -49,31 +49,44 @@ const EditChartPage: React.FC = () => {
             // 如果 chartOption 是包含 JS 代码的字符串，需要提取其中的配置对象
             let chartOptionStr = res.data.genChart || "{}";
 
-            // 如果是包含 option = {...} 的字符串，提取其中的 JSON 对象
-            if (chartOptionStr.includes("option = {")) {
-              const match = chartOptionStr.match(/option = ({[\s\S]*});/);
-              if (match && match[1]) {
-                chartOptionStr = match[1];
-              }
-            }
-
-            // ECharts 配置本身就是 JavaScript 对象格式，直接用 Function 解析
             let parsedOptions;
 
             try {
-              // 移除开头的 "option =" 和结尾的分号
-              let cleanStr = chartOptionStr
-                .replace(/^option\s*=\s*/, '')
-                .replace(/;\s*$/, '');
+              // 如果是包含 option = {...} 的字符串，提取其中的 JSON 对象
+              if (chartOptionStr.includes("option =")) {
+                // 处理可能的多种格式：option = {...}, let option = {...}, const option = {...}
+                const match = chartOptionStr.match(/(const|let|var)?\s*option\s*=\s*({[\s\S]*?});?\s*$/i);
+                if (match && match[2]) {
+                  chartOptionStr = match[2];
+                }
+              }
 
-              // 用 Function 构造器解析 JavaScript 对象
-              const func = new Function(`return ${cleanStr}`);
-              parsedOptions = func();
-            } catch (e) {
-              console.error("Function解析失败，尝试JSON解析:", e);
-
-              // 如果 Function 解析失败，回退到 JSON 解析
+              // 首先尝试直接JSON.parse
               parsedOptions = JSON.parse(chartOptionStr);
+            } catch (jsonError) {
+              console.error("JSON解析失败，尝试Function解析:", jsonError);
+              
+              try {
+                // 如果JSON解析失败，尝试使用Function解析JavaScript对象
+                // 但要先做一些格式预处理
+                let jsCode = chartOptionStr.trim();
+                
+                // 如果字符串不以 { 开头，尝试提取对象部分
+                if (!jsCode.startsWith('{') && jsCode.includes('{')) {
+                  const objMatch = jsCode.match(/{[\s\S]*}/);
+                  if (objMatch) {
+                    jsCode = objMatch[0];
+                  }
+                }
+
+                // 使用Function解析JavaScript对象
+                const func = new Function(`return (${jsCode})`);
+                parsedOptions = func();
+              } catch (functionError) {
+                console.error("Function解析失败:", functionError);
+                // 最后的备选方案：返回空对象
+                parsedOptions = {};
+              }
             }
 
             setOptions(parsedOptions);

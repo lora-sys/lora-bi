@@ -1,12 +1,12 @@
-import { listMyChartByPageUsingPost } from '@/services/lora-bi/chartController';
-import { useModel } from '@@/exports';
-import { Avatar, Card, List, message, Button, Modal, Typography } from 'antd';
+import {listMyChartByPageUsingPost} from '@/services/lora-bi/chartController';
+import {useModel} from '@@/exports';
+import {Avatar, Button, Card, List, message, Modal, Result, Typography} from 'antd';
 import ReactECharts from 'echarts-for-react';
-import React, { useEffect, useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import Search from "antd/es/input/Search";
-import { history } from '@umijs/max';
+import {history} from '@umijs/max';
 
-const { Paragraph } = Typography;
+const {Paragraph} = Typography;
 
 /**
  * 我的图表页面
@@ -16,11 +16,13 @@ const MyChartPage: React.FC = () => {
   const initSearchParams = {
     current: 1,
     pageSize: 4,
+    sortField :"createTime",
+    sortOrder:"desc"
   };
 
-  const [searchParams, setSearchParams] = useState<API.ChartQueryRequest>({ ...initSearchParams });
-  const { initialState } = useModel('@@initialState');
-  const { currentUser } = initialState ?? {};
+  const [searchParams, setSearchParams] = useState<API.ChartQueryRequest>({...initSearchParams});
+  const {initialState} = useModel('@@initialState');
+  const {currentUser} = initialState ?? {};
   const [chartList, setChartList] = useState<API.Chart[]>();
   const [total, setTotal] = useState<number>(0);
   const [loading, setLoading] = useState<boolean>(true);
@@ -39,39 +41,56 @@ const MyChartPage: React.FC = () => {
           res.data.records.forEach(data => {
             if (data.genChart) {
               try {
-                // 如果 chartOption 是包含 JS 代码的字符串，需要提取其中的配置对象
+                // 如果 chartOption 是包含 JS 代码的字符串，需要提取其中的 JSON 对象
                 let chartOptionStr = data.genChart || "{}";
 
-                // 如果是包含 option = {...} 的字符串，提取其中的 JSON 对象
-                if (chartOptionStr.includes("option = {")) {
-                  const match = chartOptionStr.match(/option = ({[\s\S]*});/);
-                  if (match && match[1]) {
-                    chartOptionStr = match[1];
-                  }
-                }
-
-                // ECharts 配置本身就是 JavaScript 对象格式，直接用 Function 解析
                 let parsedOptions;
 
                 try {
-                  // 移除开头的 "option =" 和结尾的分号
-                  let cleanStr = chartOptionStr
-                    .replace(/^option\s*=\s*/, '')
-                    .replace(/;\s*$/, '');
+                  // 更准确地提取 option = {...}; 格式中的对象部分
+                  if (chartOptionStr.includes("option =")) {
+                    // 处理可能的多种格式：option = {...}, let option = {...}, const option = {...}
+                    const match = chartOptionStr.match(/(const|let|var)?\s*option\s*=\s*({[\s\S]*?});?\s*$/i);
+                    if (match && match[2]) {
+                      chartOptionStr = match[2].trim();
+                    }
+                  }
 
-                  // 用 Function 构造器解析 JavaScript 对象
-                  const func = new Function(`return ${cleanStr}`);
-                  parsedOptions = func();
-                } catch (e) {
-                  console.error("Function解析失败，尝试JSON解析:", e);
-
-                  // 如果 Function 解析失败，回退到 JSON 解析
+                  // 首先尝试直接JSON.parse
                   parsedOptions = JSON.parse(chartOptionStr);
+                } catch (jsonError) {
+                  console.error("JSON解析失败，尝试Function解析:", jsonError);
+
+                  try {
+                    // 如果JSON解析失败，尝试使用Function解析JavaScript对象
+                    // 但要先做一些格式预处理
+                    let jsCode = chartOptionStr.trim();
+
+                    // 如果字符串不以 { 开头，尝试提取对象部分
+                    if (!jsCode.startsWith('{') && jsCode.includes('{')) {
+                      const objMatch = jsCode.match(/{[\s\S]*}/);
+                      if (objMatch) {
+                        jsCode = objMatch[0];
+                      }
+                    }
+
+                    // 使用Function解析JavaScript对象
+                    const func = new Function(`return (${jsCode})`);
+                    parsedOptions = func();
+                  } catch (functionError) {
+                    console.error("Function解析失败:", functionError);
+                    // 最后的备选方案：返回空对象
+                    parsedOptions = {};
+                  }
                 }
 
                 // 隐藏图表的 title
-                parsedOptions.title = undefined;
-                data.genChart = JSON.stringify(parsedOptions);
+                if (parsedOptions && typeof parsedOptions === 'object') {
+                  parsedOptions.title = undefined;
+                  data.genChart = JSON.stringify(parsedOptions);
+                } else {
+                  data.genChart = JSON.stringify({});
+                }
               } catch (e) {
                 console.error("图表配置解析失败:", e);
                 // 如果解析失败，保留原始数据但确保不会影响页面渲染
@@ -81,10 +100,10 @@ const MyChartPage: React.FC = () => {
           })
         }
       } else {
-        message.error('获取我的图表失败');
+        // message.error('获取我的图表失败');
       }
     } catch (e: any) {
-      message.error('获取我的图表失败，' + e.message);
+      // message.error('获取我的图表失败，' + e.message);
     }
     setLoading(false);
   };
@@ -117,7 +136,7 @@ const MyChartPage: React.FC = () => {
           })
         }}/>
       </div>
-      <div className="margin-16" />
+      <div className="margin-16"/>
       <List
         grid={{
           gutter: 16,
@@ -144,33 +163,81 @@ const MyChartPage: React.FC = () => {
         dataSource={chartList}
         renderItem={(item) => (
           <List.Item key={item.id}>
-            <Card style={{ width: '100%' }}>
+            <Card style={{width: '100%'}}>
+
               <List.Item.Meta
-                avatar={<Avatar src={currentUser && currentUser.userAvatar} />}
+                avatar={<Avatar src={currentUser && currentUser.userAvatar}/>}
                 title={item.name}
                 description={item.chartType ? '图表类型：' + item.chartType : undefined}
               />
-              <div style={{ marginBottom: 16 }} />
-              <p>{'分析目标：' + item.goal}</p>
-              <div style={{ marginBottom: 16 }} />
-              {item.genChart && <ReactECharts option={JSON.parse(item.genChart)} />}
-              <div style={{ marginBottom: 16 }} />
-              <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-                <Button 
-                  type="primary" 
+
+              <>
+              {
+                item.status === 'wait' && <>
+                  <Result
+                    status='warning'
+                    title=" 图表生成中"
+                    subTitle={item.execMessage ?? " 图表生成队列繁忙，请耐心等候"}
+                  />
+                </>
+              }
+
+
+              {
+                item.status === 'succeed' && <>
+
+                  <div style={{marginBottom: 16}}/>
+                  <p>{'分析目标：' + item.goal}</p>
+                  <div style={{marginBottom: 16}}/>
+                  {item.genChart && (() => {
+                    try {
+                      const chartOption = JSON.parse(item.genChart);
+                      return <ReactECharts option={chartOption} />;
+                    } catch (e) {
+                      console.error("渲染图表失败:", e);
+                      return <div>图表数据格式错误</div>;
+                    }
+                  })()}
+                  <div style={{marginBottom: 16}}/>
+                </>
+              }
+                {
+                  item.status === 'filed' && <>
+                    <Result
+                      status="error"
+                      title="图表生成错误"
+                      subTitle={item.execMessage}
+                    />
+                  </>
+                }
+                {
+                  item.status === 'running' && <>
+                    <Result
+                      status='info'
+                      title=" 图表生成"
+                      subTitle={item.execMessage}
+                    />
+                  </>
+                }
+
+              </>
+
+              <div style={{display: 'flex', justifyContent: 'flex-end'}}>
+                <Button
+                  type="primary"
                   onClick={() => {
                     history.push(`/edit-chart/${item.id}`);
                   }}
                 >
                   编辑
                 </Button>
-                <div style={{ marginRight: 8 }} />
-                <Button 
+                <div style={{marginRight: 8}}/>
+                <Button
                   onClick={() => {
                     if (item.chartData) {
                       showModal(item.chartData);
                     } else {
-                      message.info('暂无原始数据');
+                      // message.info('暂无原始数据');
                     }
                   }}
                 >
@@ -181,10 +248,10 @@ const MyChartPage: React.FC = () => {
           </List.Item>
         )}
       />
-      
+
       <Modal
         title="原始数据"
-        visible={isModalVisible}
+        open={isModalVisible}
         onOk={handleOk}
         onCancel={handleCancel}
         width={800}
