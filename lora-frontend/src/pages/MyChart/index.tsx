@@ -1,6 +1,6 @@
 import {listMyChartByPageUsingPost} from '@/services/lora-bi/chartController';
 import {useModel} from '@@/exports';
-import {Avatar, Button, Card, List, message, Modal, Result, Typography} from 'antd';
+import {Avatar, Button, Card, List, Modal, Result, Space, Switch, Typography} from 'antd';
 import ReactECharts from 'echarts-for-react';
 import React, {useEffect, useState} from 'react';
 import Search from "antd/es/input/Search";
@@ -16,8 +16,8 @@ const MyChartPage: React.FC = () => {
   const initSearchParams = {
     current: 1,
     pageSize: 4,
-    sortField :"createTime",
-    sortOrder:"desc"
+    sortField: "createTime",
+    sortOrder: "desc"
   };
 
   const [searchParams, setSearchParams] = useState<API.ChartQueryRequest>({...initSearchParams});
@@ -28,7 +28,46 @@ const MyChartPage: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [currentChartData, setCurrentChartData] = useState('');
+  const [autoRefresh, setAutoRefresh] = useState<boolean>(false);
+  const [refreshInterval, setRefreshInterval] = useState<number>(5000);
+  let pollTimer: NodeJS.Timeout | null = null;
 
+  /**
+   *  轮询函数
+   */
+  const startPolling = () => {
+    if (pollTimer) {
+      clearInterval(pollTimer);
+    }
+    pollTimer = setInterval(() => {
+      loadData();
+    }, refreshInterval);
+  };
+
+  const stopPolling = () => {
+    if (pollTimer) {
+      clearInterval(pollTimer);
+    }
+    pollTimer = null;
+  }
+
+  const toggleAutoRefresh = (checked: boolean) => {
+    setAutoRefresh(checked);
+    if (checked) {
+      startPolling();
+    } else {
+      stopPolling();
+    }
+  }
+
+  // 手动刷新
+  const handleManualRefresh = () => {
+    loadData();
+  };
+
+  /**
+   *  加载数据
+   */
   const loadData = async () => {
     setLoading(true);
     try {
@@ -110,7 +149,18 @@ const MyChartPage: React.FC = () => {
 
   useEffect(() => {
     loadData();
-  }, [searchParams]);
+
+    // 组件挂载时候，开启了自动刷新，则启动轮询
+    if (autoRefresh) {
+      startPolling();
+    }
+    // 组件卸载时候，清理定时器
+    return () => {
+      if (pollTimer) {
+        clearInterval(pollTimer);
+      }
+    }
+  }, [searchParams, refreshInterval, autoRefresh]);
 
   const showModal = (chartData: string) => {
     setCurrentChartData(chartData);
@@ -127,16 +177,55 @@ const MyChartPage: React.FC = () => {
 
   return (
     <div className="my-chart-page">
-      <div>
-        <Search placeholder="请输入图表名称" enterButton loading={loading} onSearch={(value) => {
-          // 设置搜索条件
-          setSearchParams({
-            ...initSearchParams,
-            name: value,
-          })
-        }}/>
-      </div>
-      <div className="margin-16"/>
+      {/* 控制面板 */}
+      <Card style={{marginBottom: 16}}>
+        <Space size="middle">
+          <Search
+            placeholder="请输入图表名称"
+            enterButton
+            loading={loading}
+            onSearch={(value) => {
+              // 设置搜索条件
+              setSearchParams({
+                ...initSearchParams,
+                name: value,
+              })
+            }}
+          />
+          <Button
+            type="primary"
+            onClick={handleManualRefresh}
+            loading={loading}
+          >
+            刷新
+          </Button>
+          <Space>
+            <span>自动刷新:</span>
+            <Switch
+              checked={autoRefresh}
+              onChange={toggleAutoRefresh}
+              checkedChildren="开"
+              unCheckedChildren="关"
+            />
+          </Space>
+          {autoRefresh && (
+            <Space>
+              <span>刷新间隔:</span>
+              <select
+                value={refreshInterval}
+                onChange={(e) => setRefreshInterval(Number(e.target.value))}
+                style={{padding: '4px 8px', borderRadius: '4px', border: '1px solid #d9d9d9'}}
+              >
+                <option value={2000}>2秒</option>
+                <option value={5000}>5秒</option>
+                <option value={10000}>10秒</option>
+                <option value={30000}>30秒</option>
+              </select>
+            </Space>
+          )}
+        </Space>
+      </Card>
+
       <List
         grid={{
           gutter: 16,
@@ -172,35 +261,35 @@ const MyChartPage: React.FC = () => {
               />
 
               <>
-              {
-                item.status === 'wait' && <>
-                  <Result
-                    status='warning'
-                    title=" 图表生成中"
-                    subTitle={item.execMessage ?? " 图表生成队列繁忙，请耐心等候"}
-                  />
-                </>
-              }
+                {
+                  item.status === 'wait' && <>
+                    <Result
+                      status='warning'
+                      title=" 图表生成中"
+                      subTitle={item.execMessage ?? " 图表生成队列繁忙，请耐心等候"}
+                    />
+                  </>
+                }
 
 
-              {
-                item.status === 'succeed' && <>
+                {
+                  item.status === 'succeed' && <>
 
-                  <div style={{marginBottom: 16}}/>
-                  <p>{'分析目标：' + item.goal}</p>
-                  <div style={{marginBottom: 16}}/>
-                  {item.genChart && (() => {
-                    try {
-                      const chartOption = JSON.parse(item.genChart);
-                      return <ReactECharts option={chartOption} />;
-                    } catch (e) {
-                      console.error("渲染图表失败:", e);
-                      return <div>图表数据格式错误</div>;
-                    }
-                  })()}
-                  <div style={{marginBottom: 16}}/>
-                </>
-              }
+                    <div style={{marginBottom: 16}}/>
+                    <p>{'分析目标：' + item.goal}</p>
+                    <div style={{marginBottom: 16}}/>
+                    {item.genChart && (() => {
+                      try {
+                        const chartOption = JSON.parse(item.genChart);
+                        return <ReactECharts option={chartOption}/>;
+                      } catch (e) {
+                        console.error("渲染图表失败:", e);
+                        return <div>图表数据格式错误</div>;
+                      }
+                    })()}
+                    <div style={{marginBottom: 16}}/>
+                  </>
+                }
                 {
                   item.status === 'filed' && <>
                     <Result
