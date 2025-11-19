@@ -1,8 +1,11 @@
 
 package com.lora.bi.controller;
+
 import cn.hutool.core.io.FileUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.github.rholder.retry.RetryerBuilder;
+import com.github.rholder.retry.StopStrategies;
 import com.google.gson.Gson;
 import com.lora.bi.annotation.AuthCheck;
 import com.lora.bi.common.BaseResponse;
@@ -30,6 +33,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
@@ -48,29 +52,18 @@ import java.util.concurrent.ThreadPoolExecutor;
 @RequestMapping("/chart")
 @Slf4j
 public class ChartController {
-
     @Resource
     private ChartService chartService;
-
     @Resource
     private UserService userService;
-
     @Resource
-
     private com.lora.bi.service.AiService aiService;
-
     @Resource
     private ThreadPoolExecutor threadPoolExecutor;
-
-
     private final static Gson GSON = new Gson();
-
     @Autowired
-
     private RedissonLimiterManager redissonLimiterManager;
-
     // region 增删改查
-
     /**
      * 创建
      *
@@ -92,7 +85,6 @@ public class ChartController {
         long newChartId = chart.getId();
         return ResultUtils.success(newChartId);
     }
-
     /**
      * 删除
      *
@@ -272,7 +264,7 @@ public class ChartController {
      */
     @PostMapping("/gen/async")
     public BaseResponse<BiGenVO> genChartByAiAsync(@RequestPart("file") MultipartFile multipartFile,
-                                                      GenChartByAIRequest genChartByAiRequest, HttpServletRequest request) throws IOException {
+                                                   GenChartByAIRequest genChartByAiRequest, HttpServletRequest request) throws IOException {
         String name = genChartByAiRequest.getName();
         String goal = genChartByAiRequest.getGoal();
         String chartType = genChartByAiRequest.getChartType();
@@ -291,7 +283,7 @@ public class ChartController {
         ThrowUtils.throwIf(!validFileSuffixList.contains(suffix), ErrorCode.PARAMS_ERROR, "文件后缀非法");
         User loginUser = userService.getLoginUser(request);
         // 限流判断，每个用户一个限流器
-       redissonLimiterManager.doRateLimit("genChartByAi_" + loginUser.getId());
+        redissonLimiterManager.doRateLimit("genChartByAi_" + loginUser.getId());
         // 构造用户输入
         StringBuilder userInput = new StringBuilder();
         userInput.append("分析需求：").append("\n");
@@ -319,7 +311,13 @@ public class ChartController {
         // 提交任务
 
         try {
-        CompletableFuture.runAsync(() -> {
+            CompletableFuture.runAsync(() -> {
+                // 进行重试机制 ！！！ 使用guava retrying,在每次进行异步任务时候
+                RetryerBuilder<String> Retryer = RetryerBuilder.<String>newBuilder()
+                        .retryIfExceptionOfType(Exception.class)
+                        .retryIfResult(result -> result == null || result.isEmpty())
+                        .withStopStrategy(StopStrategies.stopAfterAttempt(3));
+                // 最多重试3次
                 try {
                     Chart newChart = new Chart();
                     newChart.setId(chart.getId());
@@ -329,8 +327,12 @@ public class ChartController {
                     if (!b) {
                         handleChartUpdateError(chart.getId(), "更新图表执行中状态失败");
                     }
+
                     // 调用AI服务，使用配置好的chartChatBot进行数据分析
-                    String aiResult = aiService.sendMessage(String.valueOf(userInput));
+                    String aiResult =  Retryer.build().call(() -> {
+                        // 调用ai服务，加入重试机制
+                       return  aiService.sendMessage(String.valueOf(userInput));
+                    });
                     // 记录AI原始响应的前500个字符，便于调试
                     if (aiResult != null && aiResult.length() > 0) {
                         String preview = aiResult.length() > 500 ? aiResult.substring(0, 500) + "..." : aiResult;
@@ -375,14 +377,14 @@ public class ChartController {
                     log.error("ai图表生成任务执行失败", e);
                     handleChartUpdateError(chart.getId(), "ai生成图表失败:" + e.getMessage());
                 }
-        }, threadPoolExecutor);
-    } catch (RejectedExecutionException e) {
-        log.error("任务队列已经满了，无法提交ai图表生成任务",e);
-        // 更新数据库状态
-        handleChartUpdateError(chart.getId(),"系统繁忙，任务队列已经满了，请稍后重试");
-        throw new BusinessException(ErrorCode.OPERATION_ERROR,"系统繁忙，任务队列已满，请稍后重试");
+            }, threadPoolExecutor);
+        } catch (RejectedExecutionException e) {
+            log.error("任务队列已经满了，无法提交ai图表生成任务", e);
+            // 更新数据库状态
+            handleChartUpdateError(chart.getId(), "系统繁忙，任务队列已经满了，请稍后重试");
+            throw new BusinessException(ErrorCode.OPERATION_ERROR, "系统繁忙，任务队列已满，请稍后重试");
 
-    }
+        }
 
         BiGenVO biGenVO = new BiGenVO();
         biGenVO.setSuccess(true);
@@ -396,27 +398,10 @@ public class ChartController {
         updateChart.setExecMessage(execMessage);
         boolean updateResult = chartService.updateById(updateChart);
         if (!updateResult) {
-            log.error("更新图表失败状态失败" + chartId + "," + execMessage);
+            log.error("更新图表失败状态失败{},{}", chartId, execMessage);
         }
 
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
     /**
@@ -437,7 +422,6 @@ public class ChartController {
         // 校验文件
         long size = multipartFile.getSize();
         String originalFilename = multipartFile.getOriginalFilename();
-
         // 检查文件大小
         final long ONE_MB = 1024 * 1024L;
         if (size > ONE_MB) {
@@ -446,20 +430,14 @@ public class ChartController {
         // 检查原始文件名,校验后缀 aaa.png
         String suffix = FileUtil.getSuffix(originalFilename);
         List<String> validSuffix = Arrays.asList("png", "jpg", "jpeg", "gif", "svg");
-
         ThrowUtils.throwIf(!validSuffix.contains(suffix), ErrorCode.PARAMS_ERROR, "文件后缀非法");
-
         User loginUser = userService.getLoginUser(request);
         //限流判断，每个用户一个限流器
-        redissonLimiterManager.doRateLimit("genChartByAI"+loginUser.getId());
-
-
+        redissonLimiterManager.doRateLimit("genChartByAI" + loginUser.getId());
         // 校验参数
         ThrowUtils.throwIf(StringUtils.isBlank(name) || name.length() > 100, ErrorCode.PARAMS_ERROR, "名称过长");
         ThrowUtils.throwIf(StringUtils.isBlank(goal), ErrorCode.PARAMS_ERROR, "分析目标不能为空");
         ThrowUtils.throwIf(multipartFile.isEmpty(), ErrorCode.PARAMS_ERROR, "上传的文件不能为空");
-
-
         try {
             //压缩后的数据
             String csvData = ExcelUtils.excelToCsv(multipartFile);
@@ -468,62 +446,36 @@ public class ChartController {
             // 构造用户输入
             String userInput = String.format("分析目标：%s\n图表类型：%s\n名称：%s\n原始数据：\n%s",
                     goal, chartType, name, csvData);
-
             // 记录发送给AI的完整提示词
             log.info("发送给AI的完整提示词: {}", userInput);
             ThrowUtils.throwIf(userInput.isEmpty(), ErrorCode.PARAMS_ERROR, "用户输入不能为空" + userInput);
             // 调用AI服务，使用配置好的chartChatBot进行数据分析
-
             String aiResult = aiService.sendMessage(userInput);
-
             // 记录AI原始响应的前500个字符，便于调试
             if (aiResult != null && aiResult.length() > 0) {
                 String preview = aiResult.length() > 500 ? aiResult.substring(0, 500) + "..." : aiResult;
                 log.info("AI原始响应预览: {}", preview);
             }
-
             log.info("AI原始响应长度: {}", aiResult != null ? aiResult.length() : 0);
-
             log.debug("AI原始响应内容: {}", aiResult);
-
-
             // 检查AI是否返回了有效内容
-
             if (aiResult == null || aiResult.trim().isEmpty()) {
-
                 log.error("AI返回了空内容，可能API调用失败或超时");
-
                 throw new BusinessException(ErrorCode.OPERATION_ERROR, "AI服务未返回有效内容，请稍后重试");
-
             }
-
-
             // 解析AI响应，提取图表配置和分析结论
-
             String chartOption = AiResponseParser.extractContentByTag(aiResult, "execute");
-
             String conclusion = AiResponseParser.extractContentByTag(aiResult, "text");
-
             log.info("提取的图表配置: {}", chartOption);
-
             log.info("提取的分析结论: {}", conclusion);
-
             log.info("提取的图表配置长度: {}", chartOption != null ? chartOption.length() : 0);
-
             log.info("提取的分析结论长度: {}", conclusion != null ? conclusion.length() : 0);
 
-
             // 检查解析结果是否有效
-
             if (chartOption == null || chartOption.trim().isEmpty()) {
-
                 log.error("未能从AI响应中提取到有效的图表配置");
-
                 throw new BusinessException(ErrorCode.OPERATION_ERROR, "AI未能生成有效的图表配置，请检查输入数据或稍后重试");
-
             }
-
-
             if (conclusion == null || conclusion.trim().isEmpty()) {
                 log.warn("未能从AI响应中提取到分析结论");
                 // 这里我们不抛出异常，因为图表配置是主要的，分析结论是次要的
