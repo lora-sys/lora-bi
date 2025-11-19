@@ -122,11 +122,23 @@
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
-        <!-- https://mvnrepository.com/artifact/ai.z.openapi/zai-sdk -->
-        <dependency>
-            <groupId>ai.z.openapi</groupId>
-            <artifactId>zai-sdk</artifactId>
-            <version>0.1.0</version>
+        <!-- https://mvnrepository.com/artifact/ai.z.openapi/zai-sdk -->
+
+        <dependency>
+
+            <groupId>ai.z.openapi</groupId>
+
+            <artifactId>zai-sdk</artifactId>
+
+            <version>0.1.0</version>
+
+        </dependency>
+
+        <!-- https://mvnrepository.com/artifact/com.rabbitmq/amqp-client -->
+        <dependency>
+            <groupId>com.rabbitmq</groupId>
+            <artifactId>amqp-client</artifactId>
+            <version>5.27.1</version>
         </dependency>
     </dependencies>
 
