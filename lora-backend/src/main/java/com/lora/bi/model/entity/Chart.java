@@ -1,6 +1,7 @@
 package com.lora.bi.model.entity;
 
 import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
@@ -84,7 +85,16 @@ public class Chart {
      */
     private String execMessage;
 
+    /**
+     *  重试次数
+     *
+     */
+    @TableField("retry_num")
+    private Integer retryNum = 0 ; // 重试次数
+
 
     private static final long serialVersionUID = 1L;
 
 }
+
+

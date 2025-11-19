@@ -304,6 +304,7 @@ public class ChartController {
         chart.setChartData(csvData);
         chart.setChartType(chartType);
         chart.setStatus("wait");
+        chart.setRetryNum(0);
         chart.setUserId(loginUser.getId());
         boolean saveResult = chartService.save(chart);
         ThrowUtils.throwIf(!saveResult, ErrorCode.SYSTEM_ERROR, "图表保存失败");
