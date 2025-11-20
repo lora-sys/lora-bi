@@ -333,6 +333,11 @@ declare namespace API {
     userId?: number;
   };
 
+  type retryChartUsingPOSTParams = {
+    /** id */
+    id: number;
+  };
+
   type uploadFileUsingPOSTParams = {
     biz?: string;
   };

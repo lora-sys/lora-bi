@@ -243,9 +243,6 @@ public class ChartController {
 
 
 
-
-
-
     /**
      * 编辑（用户）
      *
@@ -361,12 +358,16 @@ public class ChartController {
         boolean saveResult = chartService.save(chart);
         ThrowUtils.throwIf(!saveResult, ErrorCode.SYSTEM_ERROR, "图表保存失败");
 
-        // 检查是否已有处理中的任务
-        // 拒绝并发冲突
-        Chart existChart = chartService.getById(chart.getId());
-        if ("running".equals(existChart.getStatus()) || "wait".equals(existChart.getStatus())) {
-            throw new BusinessException(ErrorCode.OPERATION_ERROR, "图表正在处理中，请勿重复提交");
-        }
+//        // 检查当前用户是否有正在处理的图表
+//        QueryWrapper<Chart> queryWrapper = new QueryWrapper<>();
+//        queryWrapper.eq("userId", loginUser.getId())
+//                .in("status", "wait", "running")
+//                .last("LIMIT 1");
+//
+//        Chart processingChart = chartService.getOne(queryWrapper);
+//        if (processingChart != null) {
+//            throw new BusinessException(ErrorCode.OPERATION_ERROR, "您有图表正在处理中，请稍后再试");
+//        }
         long newChartId = chart.getId();
         biMessageProductor.sendMessage(String.valueOf(newChartId));
 

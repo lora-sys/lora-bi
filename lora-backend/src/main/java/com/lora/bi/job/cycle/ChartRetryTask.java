@@ -10,6 +10,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.concurrent.ThreadPoolExecutor;
 
@@ -33,13 +35,26 @@ public class ChartRetryTask {
         QueryWrapper<Chart> queryWrapper = new QueryWrapper<Chart>();
         queryWrapper.eq("status", "failed")
                 .lt("retry_num", 3)
+                .lt("updateTime", LocalDateTime.now().minusMinutes(5))
                 .orderByAsc("createTime");
 
         List<Chart> failedCharts = chartService.list(queryWrapper);
         //如果更新成功，但发送消息失败，图表会卡在 wait 状态。
+
+
         // 遍历每个失败的图表
         for (Chart chart : failedCharts) {
             try {
+                // 重新查询最新状态，避免并发问题
+                Chart latestChart = chartService.getById(chart.getId());
+
+                // 如果状态已经不是 failed，跳过
+                if (!"failed".equals(latestChart.getStatus())) {
+                    log.info("图表状态已变化，跳过重试，chartId: {}", chart.getId());
+                    continue;
+                }
+
+
                 // 更新状态
                 Chart updateChart = new Chart();
                 updateChart.setId(chart.getId());
