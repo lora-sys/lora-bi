@@ -8,6 +8,7 @@ import com.github.rholder.retry.RetryerBuilder;
 import com.github.rholder.retry.StopStrategies;
 import com.google.gson.Gson;
 import com.lora.bi.annotation.AuthCheck;
+import com.lora.bi.bimq.BiMessageProductor;
 import com.lora.bi.common.BaseResponse;
 import com.lora.bi.common.DeleteRequest;
 import com.lora.bi.common.ErrorCode;
@@ -63,7 +64,12 @@ public class ChartController {
     private final static Gson GSON = new Gson();
     @Autowired
     private RedissonLimiterManager redissonLimiterManager;
+
+    @Resource
+    private BiMessageProductor biMessageProductor;
+
     // region 增删改查
+
     /**
      * 创建
      *
@@ -85,6 +91,7 @@ public class ChartController {
         long newChartId = chart.getId();
         return ResultUtils.success(newChartId);
     }
+
     /**
      * 删除
      *
@@ -262,6 +269,79 @@ public class ChartController {
      * @param request
      * @return
      */
+    @PostMapping("/gen/async/mq")
+    public BaseResponse<BiGenVO> genChartByAiAsyncMq(@RequestPart("file") MultipartFile multipartFile,
+                                                     GenChartByAIRequest genChartByAiRequest, HttpServletRequest request) throws IOException {
+
+        String name = genChartByAiRequest.getName();
+        String goal = genChartByAiRequest.getGoal();
+        String chartType = genChartByAiRequest.getChartType();
+        // 校验
+        ThrowUtils.throwIf(StringUtils.isBlank(goal), ErrorCode.PARAMS_ERROR, "目标为空");
+        ThrowUtils.throwIf(StringUtils.isNotBlank(name) && name.length() > 100, ErrorCode.PARAMS_ERROR, "名称过长");
+        // 校验文件
+        long size = multipartFile.getSize();
+        String originalFilename = multipartFile.getOriginalFilename();
+        // 校验文件大小
+        final long ONE_MB = 1024 * 1024L;
+        ThrowUtils.throwIf(size > ONE_MB, ErrorCode.PARAMS_ERROR, "文件超过 1M");
+        // 校验文件后缀 aaa.png
+        String suffix = FileUtil.getSuffix(originalFilename);
+        final List<String> validFileSuffixList = Arrays.asList("xlsx", "xls");
+        ThrowUtils.throwIf(!validFileSuffixList.contains(suffix), ErrorCode.PARAMS_ERROR, "文件后缀非法");
+        User loginUser = userService.getLoginUser(request);
+        // 限流判断，每个用户一个限流器
+        redissonLimiterManager.doRateLimit("genChartByAi_" + loginUser.getId());
+        // 构造用户输入
+        StringBuilder userInput = new StringBuilder();
+        userInput.append("分析需求：").append("\n");
+        // 拼接分析目标
+        String userGoal = goal;
+        if (StringUtils.isNotBlank(chartType)) {
+            userGoal += "，请使用" + chartType;
+        }
+        userInput.append(userGoal).append("\n");
+        userInput.append("原始数据：").append("\n");
+        // 压缩后的数据
+        String csvData = ExcelUtils.excelToCsv(multipartFile);
+        userInput.append(csvData).append("\n");
+        // 插入到数据库
+        Chart chart = new Chart();
+        chart.setName(name);
+        chart.setGoal(goal);
+        chart.setChartData(csvData);
+        chart.setChartType(chartType);
+        chart.setStatus("wait");
+        chart.setRetryNum(0);
+        chart.setUserId(loginUser.getId());
+        boolean saveResult = chartService.save(chart);
+        ThrowUtils.throwIf(!saveResult, ErrorCode.SYSTEM_ERROR, "图表保存失败");
+
+        // 检查是否已有处理中的任务
+        // 拒绝并发冲突
+        Chart existChart = chartService.getById(chart.getId());
+        if ("running".equals(existChart.getStatus()) || "wait".equals(existChart.getStatus())) {
+            throw new BusinessException(ErrorCode.OPERATION_ERROR, "图表正在处理中，请勿重复提交");
+        }
+        long newChartId = chart.getId();
+        biMessageProductor.sendMessage(String.valueOf(newChartId));
+
+        BiGenVO biGenVO = new BiGenVO();
+        biGenVO.setSuccess(true);
+        return ResultUtils.success(biGenVO);
+
+
+    }
+
+
+    /**
+     * 智能分析（异步）
+     *
+     * @param multipartFile
+     * @param genChartByAiRequest
+     * @param request
+     * @return
+     */
     @PostMapping("/gen/async")
     public BaseResponse<BiGenVO> genChartByAiAsync(@RequestPart("file") MultipartFile multipartFile,
                                                    GenChartByAIRequest genChartByAiRequest, HttpServletRequest request) throws IOException {
@@ -330,9 +410,9 @@ public class ChartController {
                     }
 
                     // 调用AI服务，使用配置好的chartChatBot进行数据分析
-                    String aiResult =  Retryer.build().call(() -> {
+                    String aiResult = Retryer.build().call(() -> {
                         // 调用ai服务，加入重试机制
-                       return  aiService.sendMessage(String.valueOf(userInput));
+                        return aiService.sendMessage(String.valueOf(userInput));
                     });
                     // 记录AI原始响应的前500个字符，便于调试
                     if (aiResult != null && aiResult.length() > 0) {

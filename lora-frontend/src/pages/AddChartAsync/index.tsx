@@ -1,6 +1,6 @@
 import {Button, Card, Form, Input, message, Select, Space, Upload} from 'antd';
 import React, {useState} from 'react';
-import {genChartByAiAsyncUsingPost} from "@/services/lora-bi/chartController";
+import {genChartByAiAsyncMqUsingPost, genChartByAiAsyncUsingPost} from "@/services/lora-bi/chartController";
 import TextArea from "antd/es/input/TextArea";
 import {UploadOutlined} from "@ant-design/icons";
 import {useForm} from "antd/es/form/Form";
@@ -34,7 +34,7 @@ const AddChartAsync: React.FC = () => {
     try {
       // 从表单值中获取文件对象
       const file = values.file?.fileList?.[0]?.originFileObj || values.file?.[0]?.originFileObj;
-      const res = await genChartByAiAsyncUsingPost({
+      const res = await genChartByAiAsyncMqUsingPost({
         goal: values.goal,
         name: values.name,
         chartType: values.chartType,
@@ -60,7 +60,7 @@ const AddChartAsync: React.FC = () => {
   return (
     <div className="add-chart-async">
       <Card title="智能分析">
-        <Form name="addChart" form ={form} onFinish={onFinish} initialValues={{}} labelAlign="left" labelCol={{span: 4}}>
+        <Form name="addChart" form={form} onFinish={onFinish} initialValues={{}} labelAlign="left" labelCol={{span: 4}}>
           <Form.Item
             name="goal"
             label="分析目标"
@@ -93,7 +93,7 @@ const AddChartAsync: React.FC = () => {
               ]}
             />
           </Form.Item>
-          <Form.Item name="file" label="原始数据"                      rules={[{required: true, message: '请输入分析文件'}]}>
+          <Form.Item name="file" label="原始数据" rules={[{required: true, message: '请输入分析文件'}]}>
             <Upload name="file" maxCount={1} listType="text">
               <Button icon={<UploadOutlined/>}>上传 CSV 文件</Button>
             </Upload>

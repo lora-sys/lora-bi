@@ -106,6 +106,7 @@ declare namespace API {
     id?: number;
     isDelete?: number;
     name?: string;
+    retryNum?: number;
     status?: string;
     updateTime?: string;
     userId?: number;
@@ -154,7 +155,13 @@ declare namespace API {
     id?: number;
   };
 
-  type genChartByAIAsyncUsingPOSTParams = {
+  type genChartByAiAsyncMqUsingPOSTParams = {
+    chartType?: string;
+    goal?: string;
+    name?: string;
+  };
+
+  type genChartByAiAsyncUsingPOSTParams = {
     chartType?: string;
     goal?: string;
     name?: string;

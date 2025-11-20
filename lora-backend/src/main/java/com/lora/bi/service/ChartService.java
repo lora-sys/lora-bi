@@ -10,4 +10,19 @@ import com.lora.bi.model.entity.Chart;
 */
 public interface ChartService extends IService<Chart> {
 
+    /**
+     *  带事务办法 更新图表状态
+      * @param chartId
+     * @param status
+     * @param execMessage
+     */
+    void updateChartStatus(long chartId,String status,String execMessage );
+
+    /**
+     *  带事务办法，更新图表结果状态
+     * @param chartId
+     * @param chartOption
+     * @param conclusion
+     */
+    void updateChartWithAiResult(long chartId,String chartOption,String conclusion );
 }

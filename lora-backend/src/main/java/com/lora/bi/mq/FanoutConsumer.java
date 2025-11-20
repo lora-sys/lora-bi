@@ -1,7 +1,16 @@
 package com.lora.bi.mq;
 import com.rabbitmq.client.*;
 
-
+/**
+ * Producer → Fanout Exchange → Queue1 (Consumer1)
+ *                           ↘ Queue2 (Consumer2)
+ *                           ↘ Queue3 (Consumer3)
+ *                           Fanout 交换机
+ * 日志系统：一条日志消息发送给多个日志处理服务
+ * 实时通知：用户消息推送给所有在线的客户端
+ * 事件广播：系统事件发送给所有订阅者
+ * 数据同步：向多个缓存、数据库同时同步数据
+ */
 public class FanoutConsumer {
 
     private static final String EXCHANGE_NAME = "direct_logs";
