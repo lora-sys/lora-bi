@@ -28,7 +28,6 @@ import java.io.IOException;
 //- 不经过 Spring 的代理，事务拦截器无法生效
 //- 需要把事务逻辑**提取到单独的方法**中
 
-
 /**
  * 消息队列消费者
  * 完整的消息队列处理流程：
@@ -73,7 +72,7 @@ public class BiMessageConsumer {
     @SneakyThrows
     @RabbitListener(queues = BiConstant.BI_QUEUE_NAME, ackMode = "MANUAL")
     public void receiveMessage(String message, Channel channel, @Header(AmqpHeaders.DELIVERY_TAG) long deliveryTag) throws IOException {
-
+        log.info(" 消费者接受到消息:{}", message);
         if (StringUtils.isBlank(message)) {
             // 消息拒绝
             channel.basicNack(deliveryTag, false, false);
@@ -85,7 +84,7 @@ public class BiMessageConsumer {
             channel.basicNack(deliveryTag, false, false);
             throw new BusinessException(ErrorCode.SYSTEM_ERROR, "图表为空");
         }
-
+        // 防止前面的状态更新成功了，结果再ai失败时候更新状态又失败了，必须抛出异常！！
         try {
             chartService.updateChartStatus(chart.getId(), "running", "图表正在生成中");
         } catch (Exception e) {
