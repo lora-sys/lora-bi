@@ -9,6 +9,19 @@ import com.lora.bi.model.entity.Chart;
 * @createDate 2025-11-13 21:24:21
 */
 public interface ChartService extends IService<Chart> {
+    /**
+     *   提升查询图表的速度
+     * @param chartId
+     * @return
+     */
+    Chart genChartWithCache(Long chartId);
+
+    /**
+     *  清理缓存速度
+     */
+    void clearChartCache(Long chartId);
+
+
 
     /**
      *  带事务办法 更新图表状态

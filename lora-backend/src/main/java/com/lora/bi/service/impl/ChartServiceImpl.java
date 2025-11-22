@@ -6,8 +6,13 @@ import com.lora.bi.exception.ThrowUtils;
 import com.lora.bi.service.ChartService;
 import com.lora.bi.model.entity.Chart;
 import com.lora.bi.mapper.ChartMapper;
+import org.redisson.api.RBucket;
+import org.redisson.api.RedissonClient;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import javax.annotation.Resource;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author yanBingZhao
@@ -15,8 +20,48 @@ import org.springframework.transaction.annotation.Transactional;
  * @createDate 2025-11-13 21:24:21
  */
 @Service
-public class ChartServiceImpl extends ServiceImpl<ChartMapper, Chart>
-        implements ChartService {
+public class ChartServiceImpl extends ServiceImpl<ChartMapper, Chart> implements ChartService {
+
+    @Resource
+    private RedissonClient redissonClient;
+
+    /**
+     *  存储缓存为查询图表添加缓存
+     * @param chartId
+     * @return
+     */
+    @Override
+    public Chart genChartWithCache(Long chartId) {
+        // 构造缓存key
+        String cacheKey = "chart:" + chartId;
+        RBucket<Chart> bucket = redissonClient.getBucket(cacheKey);
+
+        // 先从缓存获取
+        Chart chart = bucket.get();
+        if (chart != null) {
+            return chart;
+        }
+        // 缓存未命中，查询数据库
+        chart = this.getById(chartId);
+        if (chart != null) {
+            // 存入缓存，设置30分钟过期，防止雪崩
+            bucket.set(chart, 30, TimeUnit.MINUTES);
+        }
+        return chart;
+
+    }
+
+    /**
+     *  删除缓存
+     * @param chartId
+     */
+    @Override
+    public void clearChartCache(Long chartId) {
+        String cacheKey = "chart:" + chartId;
+        RBucket<Chart> bucket = redissonClient.getBucket(cacheKey);
+        bucket.delete();
+    }
+
     /**
      * 解决如果出现刚开始更新数据库成功时候后，如果出现问题导致异常，两者的状态对不上，使用事务，要么都成功，要么都失败
      *

@@ -114,6 +114,10 @@ public class ChartController {
             throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
         }
         boolean b = chartService.removeById(id);
+        if (b) {
+            // 删除后清理缓存
+            chartService.clearChartCache(deleteRequest.getId());
+        }
         return ResultUtils.success(b);
     }
 
@@ -150,9 +154,15 @@ public class ChartController {
         if (id <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
-        Chart chart = chartService.getById(id);
+        // 使用缓存查询
+
+        Chart chart = chartService.genChartWithCache(id);
         if (chart == null) {
             throw new BusinessException(ErrorCode.NOT_FOUND_ERROR);
+        }
+        User loginUser = userService.getLoginUser(request);
+        if (!loginUser.getId().equals(chart.getUserId()) && !userService.isAdmin(loginUser)) {
+            throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
         }
         return ResultUtils.success(chart);
     }
@@ -203,44 +213,33 @@ public class ChartController {
     // endregion
 
     /**
-     *  支持用户通过id手动重试生成错误的图表
+     * 支持用户通过id手动重试生成错误的图表
+     *
      * @param id
      * @param request
      * @return
      */
     @PostMapping("/retry/{id}")
     public BaseResponse<Boolean> retryChart(@PathVariable Long id, HttpServletRequest request) {
-
-        if(id== null || id<=0){
+        if (id == null || id <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
-
         User loginUser = userService.getLoginUser(request);
         Chart chart = chartService.getById(id);
-
-
         // 校验
         ThrowUtils.throwIf(chart == null, ErrorCode.NOT_FOUND_ERROR);
         ThrowUtils.throwIf(!chart.getUserId().equals(loginUser.getId()), ErrorCode.NO_AUTH_ERROR, "无权操作");
         ThrowUtils.throwIf(!"failed".equals(chart.getStatus()), ErrorCode.PARAMS_ERROR, "只能重试失败的图表");
-
-       Chart updateChart = new Chart();
-
-       updateChart.setId(id);
-       updateChart.setStatus("wait");
-       updateChart.setExecMessage("用户手动重试");
-       boolean result = chartService.updateById(updateChart);
-       ThrowUtils.throwIf(!result, ErrorCode.SYSTEM_ERROR,"更新状态事变");
-
-
-       // 发送到队列
+        Chart updateChart = new Chart();
+        updateChart.setId(id);
+        updateChart.setStatus("wait");
+        updateChart.setExecMessage("用户手动重试");
+        boolean result = chartService.updateById(updateChart);
+        ThrowUtils.throwIf(!result, ErrorCode.SYSTEM_ERROR, "更新状态事变");
+        // 发送到队列
         biMessageProductor.sendMessage(String.valueOf(id));
-
-
-     return   ResultUtils.success(true);
-
+        return ResultUtils.success(true);
     }
-
 
 
     /**
@@ -267,6 +266,10 @@ public class ChartController {
             throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
         }
         boolean result = chartService.updateById(chart);
+        if (result) {
+            // 删除后清理缓存
+            chartService.clearChartCache(chartEditRequest.getId());
+        }
         return ResultUtils.success(result);
     }
 
@@ -358,7 +361,7 @@ public class ChartController {
         boolean saveResult = chartService.save(chart);
         ThrowUtils.throwIf(!saveResult, ErrorCode.SYSTEM_ERROR, "图表保存失败");
 
-//        // 检查当前用户是否有正在处理的图表
+//        // 检查当前用户是否有正在处理的图表，已经有限流器实现，比查询数据库性能好
 //        QueryWrapper<Chart> queryWrapper = new QueryWrapper<>();
 //        queryWrapper.eq("userId", loginUser.getId())
 //                .in("status", "wait", "running")
