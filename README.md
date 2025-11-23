@@ -25,8 +25,8 @@
 ## 架构图
 
 ![架构图](./arthitecture.svg)
-
-![https://www.yuque.com/lora-imhbk/ct9fot/fq17hmfgnbim28yk?singleDoc# 《智能bi 笔记》](https://www.yuque.com/lora-imhbk/ct9fot/fq17hmfgnbim28yk?singleDoc# 《智能bi 笔记》)
+![效果图](./Snipaste_2025-11-23_18-46-17.png)
+![智能bi 笔记](https://www.yuque.com/lora-imhbk/ct9fot/fq17hmfgnbim28yk?singleDoc# 《智能bi 笔记》)
 
 ## 技术选型
 前端

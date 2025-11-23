@@ -115,7 +115,7 @@ zai:
     api-key: 4f045d60167549999025da13c71b352a.cEaLvlxkSbTIAkrS
     model: glm-4.5
     temperature: 0.3
-    max-tokens: 6000
+    max-tokens: 5000
     base-url: https://api.z.ai/api/paas/v4/
     system-message: "你是一个专业的数据分析师，能够帮助用户分析图表数据"
 # AI 系统提示词配置
