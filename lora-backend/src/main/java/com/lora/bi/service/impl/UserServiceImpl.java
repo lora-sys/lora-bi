@@ -16,13 +16,19 @@ import com.lora.bi.model.vo.LoginUserVO;
 import com.lora.bi.model.vo.UserVO;
 import com.lora.bi.service.UserService;
 import com.lora.bi.utils.SqlUtils;
+
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
+
 import lombok.extern.slf4j.Slf4j;
 import me.chanjar.weixin.common.bean.WxOAuth2UserInfo;
 import org.apache.commons.lang3.StringUtils;
+import org.redisson.api.RBucket;
+import org.redisson.api.RedissonClient;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
@@ -40,6 +46,11 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
      * 盐值，混淆密码
      */
     public static final String SALT = "lora";
+    @Resource
+    private RedissonClient redisson;
+
+    public UserServiceImpl(RedissonClient redissonClient) {
+    }
 
     @Override
     public long userRegister(String userAccount, String userPassword, String checkPassword) {
@@ -154,13 +165,16 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         if (currentUser == null || currentUser.getId() == null) {
             throw new BusinessException(ErrorCode.NOT_LOGIN_ERROR);
         }
-        // 从数据库查询（追求性能的话可以注释，直接走缓存）
-        long userId = currentUser.getId();
-        currentUser = this.getById(userId);
-        if (currentUser == null) {
-            throw new BusinessException(ErrorCode.NOT_LOGIN_ERROR);
-        }
-        return currentUser;
+        // 从session获取用户id
+        Long userId = currentUser.getId();
+        // 使用缓存获取用户信息
+        return getUserWithCache(userId);
+//        // 从数据库查询（追求性能的话可以注释，直接走缓存）
+//        long userId = currentUser.getId();
+//        currentUser = this.getById(userId);
+//        if (currentUser == null) {
+//            throw new BusinessException(ErrorCode.NOT_LOGIN_ERROR);
+//        }
     }
 
     /**
@@ -267,5 +281,39 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         queryWrapper.orderBy(SqlUtils.validSortField(sortField), sortOrder.equals(CommonConstant.SORT_ORDER_ASC),
                 sortField);
         return queryWrapper;
+    }
+
+    @Override
+    public User getUserWithCache(Long userId) {
+
+        if (userId == null || userId <= 0) {
+            return null;
+        }
+        // 构造缓存key
+        String cacheKey = "user:" + userId;
+        RBucket<User> bucket = redisson.getBucket(cacheKey);
+
+        // 缓存获取
+        User user = bucket.get();
+        if (user != null) {
+            return user;
+        }
+
+        // 查询数据库，没有命中
+        user = this.getById(userId);
+        if (user != null) {
+            //设置30分钟后过期
+            bucket.set(user, 30, TimeUnit.MINUTES);
+        }
+        return user;
+    }
+
+    @Override
+    public void clearUserCache(Long userId) {
+        if (userId != null) {
+            String cacheKey = "user:" + userId;
+            redisson.getBucket(cacheKey).delete();
+        }
+
     }
 }

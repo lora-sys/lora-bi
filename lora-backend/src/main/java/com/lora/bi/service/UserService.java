@@ -118,4 +118,9 @@ public interface UserService extends IService<User> {
      */
     QueryWrapper<User> getQueryWrapper(UserQueryRequest userQueryRequest);
 
+    User getUserWithCache(Long userId);
+
+    void clearUserCache(Long userId);
+
+
 }

@@ -61,7 +61,6 @@ public class ChartController {
     private com.lora.bi.service.AiService aiService;
     @Resource
     private ThreadPoolExecutor threadPoolExecutor;
-    private final static Gson GSON = new Gson();
     @Autowired
     private RedissonLimiterManager redissonLimiterManager;
 
@@ -117,6 +116,7 @@ public class ChartController {
         if (b) {
             // 删除后清理缓存
             chartService.clearChartCache(deleteRequest.getId());
+            chartService.clearChartListCache(); // 清理列表缓存
         }
         return ResultUtils.success(b);
     }
@@ -156,7 +156,7 @@ public class ChartController {
         }
         // 使用缓存查询
 
-        Chart chart = chartService.genChartWithCache(id);
+        Chart chart = chartService.getChartWithCache(id);
         if (chart == null) {
             throw new BusinessException(ErrorCode.NOT_FOUND_ERROR);
         }
@@ -205,8 +205,8 @@ public class ChartController {
         long size = chartQueryRequest.getPageSize();
         // 限制爬虫
         ThrowUtils.throwIf(size > 20, ErrorCode.PARAMS_ERROR);
-        Page<Chart> chartPage = chartService.page(new Page<>(current, size),
-                getQueryWrapper(chartQueryRequest));
+        // 使用缓存查询
+        Page<Chart> chartPage = chartService.listChartByPageWithCache(chartQueryRequest, request);
         return ResultUtils.success(chartPage);
     }
 
@@ -269,6 +269,7 @@ public class ChartController {
         if (result) {
             // 删除后清理缓存
             chartService.clearChartCache(chartEditRequest.getId());
+            chartService.clearChartListCache();
         }
         return ResultUtils.success(result);
     }
