@@ -77,9 +77,10 @@ public class UserController {
      * 积分查询接口
      */
     @GetMapping("/score")
-    public BaseResponse<Integer> getUserScore(@RequestBody UserLoginRequest userLoginRequest, HttpServletRequest request) {
+    public BaseResponse<Integer> getUserScore( HttpServletRequest request) {
         User loginUser = userService.getLoginUser(request);
-        return ResultUtils.success(loginUser.getScore());
+        int score = userService.getUserScore(loginUser.getId());
+        return ResultUtils.success(score);
     }
 
     /**

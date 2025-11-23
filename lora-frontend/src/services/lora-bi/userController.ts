@@ -169,9 +169,7 @@ export async function userRegisterUsingPost(
 }
 
 /** getUserScore GET /api/user/score */
-export async function getUserScoreUsingGet(
-  options?: { [key: string]: any }
-) {
+export async function getUserScoreUsingGet(options?: { [key: string]: any }) {
   return request<API.BaseResponseInt_>("/api/user/score", {
     method: "GET",
     ...(options || {}),

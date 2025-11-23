@@ -52,8 +52,8 @@ const AddChartAsync: React.FC = () => {
     message.success("分析任务已提交，正在后台处理中...");
     // 对接后端，上传数据
     try {
-      // 从表单值中获取文件对象
-      const file = values.fileList?.[0]?.originFileObj || values.file?.[0]?.originFileObj;
+      // 从表单值中获取文件对象
+      const file = values.file?.fileList?.[0]?.originFileObj || values.file?.[0]?.originFileObj;
       const res = await genChartByAiAsyncMqUsingPost({
         goal: values.goal,
         name: values.name,
