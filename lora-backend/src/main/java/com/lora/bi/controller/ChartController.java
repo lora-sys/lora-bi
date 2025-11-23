@@ -368,6 +368,11 @@ public class ChartController {
         userInput.append("原始数据：").append("\n");
         // 压缩后的数据
         String csvData = ExcelUtils.excelToCsv(multipartFile);
+        // 检查数据行数，超过100行进行采样
+        String[] lines = csvData.split("\n");
+        if (lines.length > 100) {
+            csvData = performSampling(lines, 100);// 采样到100行
+        }
         userInput.append(csvData).append("\n");
         // 插入到数据库
         Chart chart = new Chart();
@@ -460,6 +465,11 @@ public class ChartController {
         userInput.append("原始数据：").append("\n");
         // 压缩后的数据
         String csvData = ExcelUtils.excelToCsv(multipartFile);
+        // 检查数据行数，超过100行进行采样
+        String[] lines = csvData.split("\n");
+        if (lines.length > 100) {
+            csvData = performSampling(lines, 100);// 采样到100行
+        }
         userInput.append(csvData).append("\n");
         // 插入到数据库
         Chart chart = new Chart();
@@ -622,8 +632,16 @@ public class ChartController {
         ThrowUtils.throwIf(multipartFile.isEmpty(), ErrorCode.PARAMS_ERROR, "上传的文件不能为空");
 
         try {
-            //压缩后的数据
+            //压缩后的数据,读取文件，检查行数
             String csvData = ExcelUtils.excelToCsv(multipartFile);
+
+            // 检查数据行数，超过100行进行采样
+            String[] lines = csvData.split("\n");
+            if (lines.length > 100) {
+                csvData = performSampling(lines, 100);// 采样到100行
+            }
+
+
             // 数据采样优化：如果数据行数过多，只取前100行
             log.info("处理后的CSV数据: {}", csvData);
             // 构造用户输入
@@ -685,6 +703,34 @@ public class ChartController {
             log.error("AI生成图表失败", e);
             throw new BusinessException(ErrorCode.OPERATION_ERROR, "AI生成图表失败: " + e.getMessage());
         }
+    }
+
+    /**
+     * 智能采样方法
+     */
+    private String performSampling(String[] lines, int maxLines) {
+        if (lines.length < maxLines) {
+            return String.join("\n", lines);
+        }
+
+        // 保留表头
+        StringBuilder result = new StringBuilder(lines[0]).append("\n");
+
+
+        // 计算采样间隔
+        int interval = (int) Math.ceil((double) (lines.length - 1) / (maxLines - 1));
+
+        // 按间隔采样数据行
+        for (int i = 1; i < lines.length; i += interval) {
+            result.append(lines[i]).append("\n");
+        }
+
+        // 确保不超过最大行数
+        String[] resultLines = result.toString().split("\n");
+        if (resultLines.length > maxLines) {
+            return String.join("\n", Arrays.copyOf(resultLines, maxLines));
+        }
+        return result.toString();
     }
 }
 
