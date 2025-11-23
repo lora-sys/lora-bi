@@ -22,7 +22,8 @@ const MyChartPage: React.FC = () => {
 
   const [searchParams, setSearchParams] = useState<API.ChartQueryRequest>({...initSearchParams});
   const {initialState} = useModel('@@initialState');
-  const {currentUser} = initialState ?? {};
+  const {currentUser, userScore} = initialState ?? {};
+  const isAdmin = currentUser && currentUser.userRole === 'admin';
   const [chartList, setChartList] = useState<API.Chart[]>();
   const [total, setTotal] = useState<number>(0);
   const [loading, setLoading] = useState<boolean>(true);
@@ -179,51 +180,65 @@ const MyChartPage: React.FC = () => {
     <div className="my-chart-page">
       {/* 控制面板 */}
       <Card style={{marginBottom: 16}}>
-        <Space size="middle">
-          <Search
-            placeholder="请输入图表名称"
-            enterButton
-            loading={loading}
-            onSearch={(value) => {
-              // 设置搜索条件
-              setSearchParams({
-                ...initSearchParams,
-                name: value,
-              })
-            }}
-          />
-          <Button
-            type="primary"
-            onClick={handleManualRefresh}
-            loading={loading}
-          >
-            刷新
-          </Button>
-          <Space>
-            <span>自动刷新:</span>
-            <Switch
-              checked={autoRefresh}
-              onChange={toggleAutoRefresh}
-              checkedChildren="开"
-              unCheckedChildren="关"
+        <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
+          <Space size="middle">
+            <Search
+              placeholder="请输入图表名称"
+              enterButton
+              loading={loading}
+              onSearch={(value) => {
+                // 设置搜索条件
+                setSearchParams({
+                  ...initSearchParams,
+                  name: value,
+                })
+              }}
             />
-          </Space>
-          {autoRefresh && (
+            <Button
+              type="primary"
+              onClick={handleManualRefresh}
+              loading={loading}
+            >
+              刷新
+            </Button>
             <Space>
-              <span>刷新间隔:</span>
-              <select
-                value={refreshInterval}
-                onChange={(e) => setRefreshInterval(Number(e.target.value))}
-                style={{padding: '4px 8px', borderRadius: '4px', border: '1px solid #d9d9d9'}}
-              >
-                <option value={2000}>2秒</option>
-                <option value={5000}>5秒</option>
-                <option value={10000}>10秒</option>
-                <option value={30000}>30秒</option>
-              </select>
+              <span>自动刷新:</span>
+              <Switch
+                checked={autoRefresh}
+                onChange={toggleAutoRefresh}
+                checkedChildren="开"
+                unCheckedChildren="关"
+              />
             </Space>
-          )}
-        </Space>
+            {autoRefresh && (
+              <Space>
+                <span>刷新间隔:</span>
+                <select
+                  value={refreshInterval}
+                  onChange={(e) => setRefreshInterval(Number(e.target.value))}
+                  style={{padding: '4px 8px', borderRadius: '4px', border: '1px solid #d9d9d9'}}
+                >
+                  <option value={2000}>2秒</option>
+                  <option value={5000}>5秒</option>
+                  <option value={10000}>10秒</option>
+                  <option value={30000}>30秒</option>
+                </select>
+              </Space>
+            )}
+          </Space>
+          <div style={{ textAlign: 'right' }}>
+            <div style={{ fontSize: '14px', color: '#666' }}>
+              {isAdmin ? (
+                <span style={{ color: '#52c41a', fontWeight: 'bold' }}>管理员账户</span>
+              ) : (
+                <span>积分: <strong style={{ color: '#1890ff' }}>{userScore || 0}</strong> 分</span>
+              )}
+            </div>
+            <div style={{ fontSize: '12px', color: '#999' }}>
+              每次生成消耗 10 分
+            </div>
+          </div>
+        </div>
       </Card>
 
       <List

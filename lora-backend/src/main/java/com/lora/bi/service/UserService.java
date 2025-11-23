@@ -122,5 +122,21 @@ public interface UserService extends IService<User> {
 
     void clearUserCache(Long userId);
 
+    /**
+     *  获取用户积分
+     * @param userId
+     * @return
+     */
+    int getUserScore(Long userId);
+
+    boolean deductScore(Long userId,int score);
+
+    /**
+     *  增加积分
+     * @param userId
+     * @param score
+     * @return
+     */
+    boolean addScore(Long userId,int score);
 
 }

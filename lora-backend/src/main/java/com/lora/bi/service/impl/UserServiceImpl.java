@@ -46,6 +46,11 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
      * 盐值，混淆密码
      */
     public static final String SALT = "lora";
+
+    /**
+     * ai 每次分析消耗积分
+     */
+    public static final int CHART_ANALYSIS_COST = 10;// 每次分析消耗10积分
     @Resource
     private RedissonClient redisson;
 
@@ -80,6 +85,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             String encryptPassword = DigestUtils.md5DigestAsHex((SALT + userPassword).getBytes());
             // 3. 插入数据
             User user = new User();
+            user.setScore(100);
             user.setUserAccount(userAccount);
             user.setUserPassword(encryptPassword);
             boolean saveResult = this.save(user);
@@ -314,6 +320,75 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             String cacheKey = "user:" + userId;
             redisson.getBucket(cacheKey).delete();
         }
+
+    }
+
+    @Override
+    public int getUserScore(Long userId) {
+
+        User byId = this.getById(userId);
+        if (byId != null) {
+            return byId.getScore() < 0 ? byId.getScore() : 0;
+        }
+        return 0;
+    }
+
+    @Override
+    public boolean deductScore(Long userId, int score) {
+        if (userId == null || userId <= 0) {
+            return false;
+        }
+        // 获取当前用户积分
+        User user = this.getById(userId);
+        if (user == null) {
+            throw new BusinessException(ErrorCode.OPERATION_ERROR, "用户不存在");
+        }
+        // 检查是否为管理员,管理员无需扣减积分
+        if(isAdmin(user)) {
+            return true; // 直接返回成功，不扣减积分
+        }
+
+        int currentScore = user.getScore() != 0 ? user.getScore() : 0;
+        if (currentScore < score) {
+            throw new BusinessException(ErrorCode.OPERATION_ERROR, "积分不足");
+        }
+        //非管理员 扣减积分
+        User updateUser = new User();
+        updateUser.setId(userId);
+        updateUser.setScore(currentScore - score);
+
+        boolean result = this.updateById(updateUser);
+        if (result) {
+            // 扣减成功清理缓存
+            clearUserCache(userId);
+        }
+        return result;
+
+    }
+
+    @Override
+    public boolean addScore(Long userId, int score) {
+        if (userId == null || score <= 0) {
+            return false;
+        }
+        // 获取当前用户积分
+        User user = this.getById(userId);
+        if (user == null) {
+            throw new BusinessException(ErrorCode.NOT_FOUND_ERROR, "用户不存在");
+        }
+
+        int currentScore = user.getScore() != 0 ? user.getScore() : 0;
+
+        // 增加积分
+        User updateUser = new User();
+        updateUser.setId(userId);
+        updateUser.setScore(currentScore + score);
+        boolean result = this.updateById(updateUser);
+        if (result) {
+            // 增加成功后清理缓存
+            clearUserCache(userId);
+        }
+        return result;
 
     }
 }

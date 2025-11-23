@@ -53,6 +53,9 @@ import java.util.concurrent.ThreadPoolExecutor;
 @RequestMapping("/chart")
 @Slf4j
 public class ChartController {
+    public static final int CHART_ANALYSIS_COST = 10; //    每次分析消耗10积分
+
+
     @Resource
     private ChartService chartService;
     @Resource
@@ -335,6 +338,22 @@ public class ChartController {
         final List<String> validFileSuffixList = Arrays.asList("xlsx", "xls");
         ThrowUtils.throwIf(!validFileSuffixList.contains(suffix), ErrorCode.PARAMS_ERROR, "文件后缀非法");
         User loginUser = userService.getLoginUser(request);
+        // 获取用户后检查积分
+        // 检查管理员
+        if (!userService.isAdmin(loginUser)) {
+            // 检查积分是否足够
+            int chartAnalysisCost = 10;
+            int currentScore = userService.getUserScore(loginUser.getId());
+            if (currentScore < chartAnalysisCost) {
+                throw new BusinessException(ErrorCode.OPERATION_ERROR, "积分不足，请充值后使用");
+            }
+            // 扣减积分
+            boolean deductResult = userService.deductScore(loginUser.getId(), chartAnalysisCost);
+            if (!deductResult) {
+                throw new BusinessException(ErrorCode.SYSTEM_ERROR, "积分扣减失败");
+            }
+
+        }
         // 限流判断，每个用户一个限流器
         redissonLimiterManager.doRateLimit("genChartByAi_" + loginUser.getId());
         // 构造用户输入
@@ -411,6 +430,22 @@ public class ChartController {
         final List<String> validFileSuffixList = Arrays.asList("xlsx", "xls");
         ThrowUtils.throwIf(!validFileSuffixList.contains(suffix), ErrorCode.PARAMS_ERROR, "文件后缀非法");
         User loginUser = userService.getLoginUser(request);
+        // 获取用户后检查积分
+        // 获取用户后检查积分
+        // 检查管理员
+        if (!userService.isAdmin(loginUser)) {
+            // 检查积分是否足够
+            int chartAnalysisCost = 10;
+            int currentScore = userService.getUserScore(loginUser.getId());
+            if (currentScore < chartAnalysisCost) {
+                throw new BusinessException(ErrorCode.OPERATION_ERROR, "积分不足，请充值后使用");
+            }
+            // 扣减积分
+            boolean deductResult = userService.deductScore(loginUser.getId(), chartAnalysisCost);
+            if (!deductResult) {
+                throw new BusinessException(ErrorCode.SYSTEM_ERROR, "积分扣减失败");
+            }
+        }
         // 限流判断，每个用户一个限流器
         redissonLimiterManager.doRateLimit("genChartByAi_" + loginUser.getId());
         // 构造用户输入
@@ -562,12 +597,30 @@ public class ChartController {
         List<String> validSuffix = Arrays.asList("png", "jpg", "jpeg", "gif", "svg");
         ThrowUtils.throwIf(!validSuffix.contains(suffix), ErrorCode.PARAMS_ERROR, "文件后缀非法");
         User loginUser = userService.getLoginUser(request);
+        // 获取用户后检查积分
+        // 检查管理员
+        if (!userService.isAdmin(loginUser)) {
+            // 检查积分是否足够
+            int chartAnalysisCost = 10;
+            int currentScore = userService.getUserScore(loginUser.getId());
+            if (currentScore < chartAnalysisCost) {
+                throw new BusinessException(ErrorCode.OPERATION_ERROR, "积分不足，请充值后使用");
+            }
+            // 扣减积分
+            boolean deductResult = userService.deductScore(loginUser.getId(), chartAnalysisCost);
+            if (!deductResult) {
+                throw new BusinessException(ErrorCode.SYSTEM_ERROR, "积分扣减失败");
+            }
+        }
+        // 继续ai分析
+
         //限流判断，每个用户一个限流器
         redissonLimiterManager.doRateLimit("genChartByAI" + loginUser.getId());
         // 校验参数
         ThrowUtils.throwIf(StringUtils.isBlank(name) || name.length() > 100, ErrorCode.PARAMS_ERROR, "名称过长");
         ThrowUtils.throwIf(StringUtils.isBlank(goal), ErrorCode.PARAMS_ERROR, "分析目标不能为空");
         ThrowUtils.throwIf(multipartFile.isEmpty(), ErrorCode.PARAMS_ERROR, "上传的文件不能为空");
+
         try {
             //压缩后的数据
             String csvData = ExcelUtils.excelToCsv(multipartFile);

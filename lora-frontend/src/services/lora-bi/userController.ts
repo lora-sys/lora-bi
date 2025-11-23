@@ -138,6 +138,21 @@ export async function userLogoutUsingPost(options?: { [key: string]: any }) {
   });
 }
 
+/** rechargeScore POST /api/user/recharge */
+export async function rechargeScoreUsingPost(
+  body: Record<string, any>,
+  options?: { [key: string]: any }
+) {
+  return request<API.BaseResponseBoolean_>("/api/user/recharge", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    data: body,
+    ...(options || {}),
+  });
+}
+
 /** userRegister POST /api/user/register */
 export async function userRegisterUsingPost(
   body: API.UserRegisterRequest,
@@ -149,6 +164,16 @@ export async function userRegisterUsingPost(
       "Content-Type": "application/json",
     },
     data: body,
+    ...(options || {}),
+  });
+}
+
+/** getUserScore GET /api/user/score */
+export async function getUserScoreUsingGet(
+  options?: { [key: string]: any }
+) {
+  return request<API.BaseResponseInt_>("/api/user/score", {
+    method: "GET",
     ...(options || {}),
   });
 }

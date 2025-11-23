@@ -1,10 +1,17 @@
 import type {RequestConfig, RunTimeLayoutConfig} from '@umijs/max';
+
 import {history} from '@umijs/max';
+
 import React from 'react';
+
 import {AvatarDropdown, AvatarName, Footer, Question} from '@/components';
+
 import {errorConfig} from './requestErrorConfig';
+
 import '@ant-design/v5-patch-for-react-19';
-import {getLoginUserUsingGet} from "@/services/lora-bi/userController";
+
+import {getLoginUserUsingGet, getUserScoreUsingGet} from "@/services/lora-bi/userController";
+
 
 const isDev = process.env.NODE_ENV === 'development';
 const isDevOrTest = isDev || process.env.CI;
@@ -15,6 +22,7 @@ const loginPath = '/user/login';
  * */
 export async function getInitialState(): Promise<{
   currentUser?: API.LoginUserVO;
+  userScore?: number;
 }> {
   const fetchUserInfo = async () => {
     try {
@@ -25,17 +33,37 @@ export async function getInitialState(): Promise<{
     }
     return undefined;
   };
+
+  const fetchUserScore = async () => {
+    try {
+      const res = await getUserScoreUsingGet();
+      if (res.data !== undefined) {
+        return res.data;
+      }
+    } catch (_error) {
+      console.error("获取用户积分失败:", _error);
+    }
+    return 0;
+  };
+
   // 如果不是登录页面，执行
+
   const {location} = history;
   if (![loginPath, '/user/register', '/user/register-result'].includes(location.pathname)) {
     const currentUser = await fetchUserInfo();
-    return {
-      currentUser,
-    };
+    if (currentUser) {
+      const userScore = await fetchUserScore();
+      return {
+        currentUser,
+        userScore,
+      };
+    } else {
+      return {};
+    }
   }
-  return {
-  };
+  return {};
 }
+
 
 // ProLayout 支持的api https://procomponents.ant.design/components/layout
 export const layout: RunTimeLayoutConfig = ({initialState, setInitialState}) => {

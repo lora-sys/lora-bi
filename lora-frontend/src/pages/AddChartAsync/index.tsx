@@ -1,17 +1,31 @@
 import {Button, Card, Form, Input, message, Select, Space, Upload} from 'antd';
+
 import React, {useState} from 'react';
+
 import {genChartByAiAsyncMqUsingPost, genChartByAiAsyncUsingPost} from "@/services/lora-bi/chartController";
+
 import TextArea from "antd/es/input/TextArea";
+
 import {UploadOutlined} from "@ant-design/icons";
+
 import {useForm} from "antd/es/form/Form";
+
+import {useModel} from "@@/exports";
 
 
 /**
+
  * 添加图表页面 (异步)
+
  * @constructor
+
  */
+
 const AddChartAsync: React.FC = () => {
   const [form] = useForm();
+  const {initialState} = useModel('@@initialState');
+  const {currentUser, userScore} = initialState ?? {};
+  const isAdmin = currentUser && currentUser.userRole === 'admin';
   const [chart, setChart] = useState<API.BiGenVO>();
   const [options, setOptions] = useState<any>({});
   const [submitting, setSubmitting] = useState<boolean>(false);
@@ -19,21 +33,27 @@ const AddChartAsync: React.FC = () => {
    * 提交
    * @param values
    */
+
   const onFinish = async (values: any) => {
+    // 检查是否为管理员，如果不是管理员则检查积分
+    if (!isAdmin) {
+      if (userScore === undefined || userScore < 10) {
+        message.error("积分不足，每次生成需要消耗10积分，请先充值");
+        return;
+      }
+    }
 
     if (submitting)
       return;
     setSubmitting(true);
     setChart(undefined);
     setOptions(undefined);
-
     // 立即显示提交成功消息，提升用户体验
     message.success("分析任务已提交，正在后台处理中...");
-
     // 对接后端，上传数据
     try {
       // 从表单值中获取文件对象
-      const file = values.file?.fileList?.[0]?.originFileObj || values.file?.[0]?.originFileObj;
+      const file = values.fileList?.[0]?.originFileObj || values.file?.[0]?.originFileObj;
       const res = await genChartByAiAsyncMqUsingPost({
         goal: values.goal,
         name: values.name,
@@ -43,14 +63,13 @@ const AddChartAsync: React.FC = () => {
         message.error("生成失败: 服务器返回空数据");
         return;
       } else {
-        // 任务成功提交到后端
         message.success("分析任务提交成功,稍后请在我的图表页面查看");
         form.resetFields();
         // 重置图表状态，确保不会显示之前的图表
         setChart(undefined);
         setOptions({});
-
       }
+
     } catch (error: any) {
       message.error("生成失败: " + error.message);
     }
@@ -107,12 +126,9 @@ const AddChartAsync: React.FC = () => {
               <Button htmlType="reset" onClick={() => (setChart(undefined), setOptions({}))}>重置</Button>
             </Space>
           </Form.Item>
-
         </Form>
       </Card>
-
     </div>
-  )
-    ;
+  );
 };
 export default AddChartAsync;

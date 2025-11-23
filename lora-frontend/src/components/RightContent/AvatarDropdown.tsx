@@ -67,16 +67,22 @@ export const AvatarDropdown: React.FC<GlobalHeaderRightProps> = ({
 
   const { initialState, setInitialState } = useModel('@@initialState');
 
-  const onMenuClick: MenuProps['onClick'] = (event) => {
-    const { key } = event;
-    if (key === 'logout') {
-      flushSync(() => {
-        setInitialState((s) => ({ ...s, currentUser: undefined }));
-      });
-      loginOut();
-      return;
-    }
-    history.push(`/account/${key}`);
+  const onMenuClick: MenuProps['onClick'] = (event) => {
+    const { key } = event;
+    if (key === 'logout') {
+      flushSync(() => {
+        setInitialState((s) => ({ ...s, currentUser: undefined }));
+      });
+      loginOut();
+      return;
+    }
+    
+    if (key === 'score') {
+      history.push('/user-score');
+      return;
+    }
+    
+    history.push(`/account/${key}`);
   };
 
   const loading = (
@@ -101,29 +107,34 @@ export const AvatarDropdown: React.FC<GlobalHeaderRightProps> = ({
     return loading;
   }
 
-  const menuItems = [
-    ...(menu
-      ? [
-          {
-            key: 'center',
-            icon: <UserOutlined />,
-            label: '个人中心',
-          },
-          {
-            key: 'settings',
-            icon: <SettingOutlined />,
-            label: '个人设置',
-          },
-          {
-            type: 'divider' as const,
-          },
-        ]
-      : []),
-    {
-      key: 'logout',
-      icon: <LogoutOutlined />,
-      label: '退出登录',
-    },
+  const menuItems = [
+    ...(menu
+      ? [
+          {
+            key: 'center',
+            icon: <UserOutlined />,
+            label: '个人中心',
+          },
+          {
+            key: 'settings',
+            icon: <SettingOutlined />,
+            label: '个人设置',
+          },
+          {
+            key: 'score',
+            icon: <SettingOutlined />,
+            label: '积分管理',
+          },
+          {
+            type: 'divider' as const,
+          },
+        ]
+      : []),
+    {
+      key: 'logout',
+      icon: <LogoutOutlined />,
+      label: '退出登录',
+    },
   ];
 
   return (

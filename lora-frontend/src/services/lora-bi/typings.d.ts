@@ -347,6 +347,7 @@ declare namespace API {
     id?: number;
     isDelete?: number;
     mpOpenId?: string;
+    score?: number;
     unionId?: string;
     updateTime?: string;
     userAccount?: string;
