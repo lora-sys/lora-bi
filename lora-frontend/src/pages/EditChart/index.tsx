@@ -1,6 +1,6 @@
-import { getChartByIdUsingGet, updateChartUsingPost } from '@/services/lora-bi/chartController';
+import { getChartByIdUsingGet, updateChartUsingPost, retryChartUsingPost } from '@/services/lora-bi/chartController';
 import { useModel } from '@@/exports';
-import { Button, Card, Col, Form, Input, message, Row, Select, Space, Upload } from 'antd';
+import { Button, Card, Col, Form, Input, message, Row, Select, Space, Tag, Upload } from 'antd';
 import TextArea from 'antd/es/input/TextArea';
 import React, { useEffect, useState } from 'react';
 import { history, useParams } from '@umijs/max';
@@ -20,6 +20,7 @@ const EditChartPage: React.FC = () => {
   const [options, setOptions] = useState<any>({});
   const [loading, setLoading] = useState<boolean>(true);
   const [submitting, setSubmitting] = useState<boolean>(false);
+  const [retrying, setRetrying] = useState<boolean>(false);
   const [previewOptions, setPreviewOptions] = useState<any>({});
   const [previewData, setPreviewData] = useState<string>('');
 
@@ -29,7 +30,7 @@ const EditChartPage: React.FC = () => {
       history.push('/my-chart');
       return;
     }
-    
+
     setLoading(true);
     try {
       const res = await getChartByIdUsingGet({ id: parseInt(id) });
@@ -42,7 +43,7 @@ const EditChartPage: React.FC = () => {
           chartData: res.data.chartData,
         });
         setPreviewData(res.data.chartData || '');
-        
+
         // 解析图表选项
         if (res.data.genChart) {
           try {
@@ -65,12 +66,12 @@ const EditChartPage: React.FC = () => {
               parsedOptions = JSON.parse(chartOptionStr);
             } catch (jsonError) {
               console.error("JSON解析失败，尝试Function解析:", jsonError);
-              
+
               try {
                 // 如果JSON解析失败，尝试使用Function解析JavaScript对象
                 // 但要先做一些格式预处理
                 let jsCode = chartOptionStr.trim();
-                
+
                 // 如果字符串不以 { 开头，尝试提取对象部分
                 if (!jsCode.startsWith('{') && jsCode.includes('{')) {
                   const objMatch = jsCode.match(/{[\s\S]*}/);
@@ -120,10 +121,10 @@ const EditChartPage: React.FC = () => {
       message.error('参数错误');
       return;
     }
-      
+
     if (submitting) return;
     setSubmitting(true);
-    
+
     try {
       const res = await updateChartUsingPost({
         id: parseInt(id),
@@ -132,7 +133,7 @@ const EditChartPage: React.FC = () => {
         chartType: values.chartType,
         chartData: values.chartData,
       });
-      
+
       if (res.data) {
         message.success('更新成功');
         history.push('/my-chart');
@@ -156,12 +157,39 @@ const EditChartPage: React.FC = () => {
     message.success('预览数据已更新');
   };
 
+  /**
+   * 重试图表生成
+   */
+  const handleRetry = async () => {
+    if (!id) {
+      message.error('参数错误');
+      return;
+    }
+    if (retrying) return;
+    setRetrying(true);
+    try {
+      const res = await retryChartUsingPost({
+        id: parseInt(id),
+      });
+      if (res.data) {
+        message.success('重试请求已提交');
+        // 重新加载图表信息
+        await loadData();
+      } else {
+        message.error('重试失败');
+      }
+    } catch (e: any) {
+      message.error('重试失败: ' + e.message);
+    }
+    setRetrying(false);
+  };
+
   return (
     <div className="edit-chart-page" style={{ padding: '24px' }}>
       <div style={{ background: '#fff', padding: '24px', borderRadius: '8px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
         <Row gutter={24}>
           <Col span={12}>
-            <Card 
+            <Card
               title={
                 <div style={{ fontSize: '18px', fontWeight: 'bold', color: '#1890ff' }}>
                   编辑图表
@@ -169,12 +197,12 @@ const EditChartPage: React.FC = () => {
               }
               style={{ height: '100%' }}
             >
-              <Form 
+              <Form
                 form={form}
-                name="editChart" 
-                onFinish={onFinish} 
-                initialValues={{}} 
-                labelAlign="left" 
+                name="editChart"
+                onFinish={onFinish}
+                initialValues={{}}
+                labelAlign="left"
                 labelCol={{ span: 6 }}
                 disabled={loading}
               >
@@ -187,7 +215,7 @@ const EditChartPage: React.FC = () => {
                 >
                   <Input placeholder="请输入图表名称" style={{ borderRadius: '6px' }} />
                 </Form.Item>
-                
+
                 <Form.Item
                   name="goal"
                   label={
@@ -195,15 +223,15 @@ const EditChartPage: React.FC = () => {
                   }
                   rules={[{ required: true, message: '请输入分析目标' }]}
                 >
-                  <TextArea 
-                    placeholder="请输入你的分析需求" 
-                    autoSize={{ minRows: 3, maxRows: 6 }} 
+                  <TextArea
+                    placeholder="请输入你的分析需求"
+                    autoSize={{ minRows: 3, maxRows: 6 }}
                     style={{ borderRadius: '6px' }}
                   />
                 </Form.Item>
-                
-                <Form.Item 
-                  name="chartType" 
+
+                <Form.Item
+                  name="chartType"
                   label={
                     <span style={{ fontWeight: '500' }}>图表类型</span>
                   }
@@ -231,7 +259,7 @@ const EditChartPage: React.FC = () => {
                     ]}
                   />
                 </Form.Item>
-                
+
                 <Form.Item
                   name="chartData"
                   label={
@@ -239,31 +267,42 @@ const EditChartPage: React.FC = () => {
                   }
                   rules={[{ required: true, message: '请输入原始数据' }]}
                 >
-                  <TextArea 
-                    placeholder="请输入原始数据" 
-                    autoSize={{ minRows: 4, maxRows: 10 }} 
+                  <TextArea
+                    placeholder="请输入原始数据"
+                    autoSize={{ minRows: 4, maxRows: 10 }}
                     style={{ borderRadius: '6px', fontFamily: 'monospace' }}
                   />
                 </Form.Item>
 
                 <Form.Item wrapperCol={{ span: 24 }}>
                   <Space size="middle">
-                    <Button 
-                      type="primary" 
-                      htmlType="submit" 
-                      loading={submitting} 
+                    <Button
+                      type="primary"
+                      htmlType="submit"
+                      loading={submitting}
                       disabled={submitting}
                       style={{ borderRadius: '6px', minWidth: '80px' }}
                     >
                       更新
                     </Button>
-                    <Button 
+                    {chart?.status && (chart.status === 'failed' || chart.status === 'wait' || chart.status === 'running') && (
+                      <Button
+                        type="default"
+                        onClick={handleRetry}
+                        loading={retrying}
+                        disabled={retrying}
+                        style={{ borderRadius: '6px', minWidth: '80px' }}
+                      >
+                        重试
+                      </Button>
+                    )}
+                    <Button
                       onClick={() => form.validateFields().then(onPreview).catch(() => {})}
                       style={{ borderRadius: '6px', minWidth: '80px' }}
                     >
                       预览
                     </Button>
-                    <Button 
+                    <Button
                       onClick={() => history.push('/my-chart')}
                       style={{ borderRadius: '6px', minWidth: '80px' }}
                     >
@@ -274,9 +313,9 @@ const EditChartPage: React.FC = () => {
               </Form>
             </Card>
           </Col>
-          
+
           <Col span={12}>
-            <Card 
+            <Card
               title={
                 <div style={{ fontSize: '18px', fontWeight: 'bold', color: '#52c41a' }}>
                   图表预览
@@ -285,16 +324,46 @@ const EditChartPage: React.FC = () => {
               style={{ height: '100%' }}
             >
               <div style={{ height: '400px', marginBottom: '20px' }}>
-                {previewOptions && Object.keys(previewOptions).length > 0 ? (
+                {chart?.status === 'failed' && (
+                  <div style={{ marginBottom: '16px', textAlign: 'center' }}>
+                    <Tag color="red" style={{ fontSize: '14px', padding: '4px 12px' }}>
+                      图表生成失败
+                    </Tag>
+                    <div style={{ marginTop: '8px', color: '#ff4d4f' }}>
+                      {chart.execMessage || '图表生成失败，请重试'}
+                    </div>
+                  </div>
+                )}
+                {chart?.status === 'running' && (
+                  <div style={{ marginBottom: '16px', textAlign: 'center' }}>
+                    <Tag color="blue" style={{ fontSize: '14px', padding: '4px 12px' }}>
+                      图表生成中
+                    </Tag>
+                    <div style={{ marginTop: '8px', color: '#1890ff' }}>
+                      {chart.execMessage || '图表正在生成中，请稍候...'}
+                    </div>
+                  </div>
+                )}
+                {chart?.status === 'wait' && (
+                  <div style={{ marginBottom: '16px', textAlign: 'center' }}>
+                    <Tag color="orange" style={{ fontSize: '14px', padding: '4px 12px' }}>
+                      等待处理
+                    </Tag>
+                    <div style={{ marginTop: '8px', color: '#fa8c16' }}>
+                      {chart.execMessage || '图表等待处理中...'}
+                    </div>
+                  </div>
+                )}
+                {(chart?.status === 'succeed' || (previewOptions && Object.keys(previewOptions).length > 0)) ? (
                   <ReactECharts option={previewOptions} style={{ height: '100%', width: '100%' }} />
                 ) : (
-                  <div 
-                    style={{ 
-                      display: 'flex', 
-                      justifyContent: 'center', 
-                      alignItems: 'center', 
-                      height: '100%', 
-                      backgroundColor: '#f9f9f9', 
+                  <div
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                      height: '100%',
+                      backgroundColor: '#f9f9f9',
                       borderRadius: '4px',
                       color: '#bfbfbf'
                     }}
@@ -304,26 +373,26 @@ const EditChartPage: React.FC = () => {
                 )}
               </div>
               <div style={{ marginTop: 16 }}>
-                <h4 style={{ 
-                  color: '#535353', 
-                  marginBottom: '8px', 
+                <h4 style={{
+                  color: '#535353',
+                  marginBottom: '8px',
                   fontWeight: '600',
                   display: 'flex',
                   alignItems: 'center'
                 }}>
-                  <span style={{ 
-                    display: 'inline-block', 
-                    width: '4px', 
-                    height: '16px', 
-                    backgroundColor: '#1890ff', 
+                  <span style={{
+                    display: 'inline-block',
+                    width: '4px',
+                    height: '16px',
+                    backgroundColor: '#1890ff',
                     borderRadius: '2px',
                     marginRight: '8px'
                   }}></span>
                   原始数据预览
                 </h4>
-                <div style={{ 
-                  backgroundColor: '#f9f9f9', 
-                  padding: '12px', 
+                <div style={{
+                  backgroundColor: '#f9f9f9',
+                  padding: '12px',
                   borderRadius: '6px',
                   maxHeight: '200px',
                   overflow: 'auto',
@@ -332,8 +401,8 @@ const EditChartPage: React.FC = () => {
                   fontSize: '12px',
                   lineHeight: '1.5'
                 }}>
-                  <pre style={{ 
-                    margin: 0, 
+                  <pre style={{
+                    margin: 0,
                     whiteSpace: 'pre-wrap',
                     wordBreak: 'break-all',
                     color: '#666'
